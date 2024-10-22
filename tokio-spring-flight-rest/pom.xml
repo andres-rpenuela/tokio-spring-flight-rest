@@ -70,4 +70,23 @@
 		</plugins>
 	</build>
 
+	<!-- profiles -->
+	<profiles>
+		<profile>
+			<id>dev</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties><!-- file: application-dev.[properties/yml] -->
+				<spring.profiles.active>dev</spring.profiles.active>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>pro</id>
+			<properties><!-- file: application-pro.[properties/yml] -->
+				<spring.profiles.active>pro</spring.profiles.active>
+			</properties>
+		</profile>
+	</profiles>
 </project>
