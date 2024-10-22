@@ -10,6 +10,7 @@
 	<description>tokio-spring-flight-rest</description>
 	<!-- gestion de modulos -->
 	<modules>
+		<module>store-api</module>
 	</modules>
 
 	<!-- por defecto es "jar"-->
