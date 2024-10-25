@@ -78,7 +78,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<!-- resources que modificara mven -->
+		<!-- resources que modificara mvn -->
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -101,6 +101,13 @@
 
 		<profile>
 			<id>pro</id>
+			<properties><!-- file: application-pro.[properties/yml] -->
+				<spring.profiles.active>pro</spring.profiles.active>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>test</id>
 			<properties><!-- file: application-pro.[properties/yml] -->
 				<spring.profiles.active>pro</spring.profiles.active>
 			</properties>
