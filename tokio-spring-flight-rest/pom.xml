@@ -11,6 +11,7 @@
 	<!-- gestion de modulos -->
 	<modules>
 		<module>store-api</module>
+		<module>resource-api</module>
 	</modules>
 
 	<!-- por defecto es "jar"-->
