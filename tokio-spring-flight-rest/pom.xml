@@ -10,6 +10,7 @@
 	<description>tokio-spring-flight-rest</description>
 	<!-- gestion de modulos -->
 	<modules>
+		<module>store-api</module>
 	</modules>
 
 	<!-- por defecto es "jar"-->
@@ -50,6 +51,16 @@
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
+
+		<!-- tests -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -67,6 +78,51 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<!-- resources que modificara mvn -->
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 	</build>
 
+	<!-- profiles -->
+	<profiles>
+		<profile>
+			<id>dev</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<!--<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+						<filtering>true</filtering>
+						<includes>
+							<include>**/application-dev.properties</include>
+						</includes>
+					</resource>
+				</resources>
+			</build>-->
+			<!-- file: application-dev.[properties/yml] -->
+			<properties>
+				<spring.profiles.active>dev</spring.profiles.active>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>pro</id>
+			<properties><!-- file: application-pro.[properties/yml] -->
+				<spring.profiles.active>pro</spring.profiles.active>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>test</id>
+			<properties><!-- file: application-pro.[properties/yml] -->
+				<spring.profiles.active>pro</spring.profiles.active>
+			</properties>
+		</profile>
+	</profiles>
 </project>
