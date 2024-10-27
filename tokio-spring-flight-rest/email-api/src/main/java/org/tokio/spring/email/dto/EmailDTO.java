@@ -13,5 +13,5 @@ public class EmailDTO {
     String to;
     String subject;
     String textBody;
-    List<AttachmentDTO> attachmentsDTO;
+    List<AttachmentDTO> attachments;
 }
