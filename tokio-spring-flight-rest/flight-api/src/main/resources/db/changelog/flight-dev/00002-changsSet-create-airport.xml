@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    
+    <changeSet  author="andres.rpenuela"  id="create-airpot" context="development">
+        <createTable tableName="airports">
+            <column name="acronym" type="varchar(3)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="country" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="latitude" type="DECIMAL(10,8)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="longitude" type="DECIMAL(10,8)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet  author="andres.rpenuela"  id="init-airpot" context="development">
+        <insert tableName="airports">
+            <column name="acronym" value="ABC" />
+            <column name="name" value="Aberdeen Airport" />
+            <column name="country" value="United Kingdom" />
+            <column name="latitude" value="57.282713" />
+            <column name="longitude" value="-2.92333" />
+        </insert>
+
+        <insert tableName="airports">
+            <column name="acronym" value="EDI" />
+            <column name="name" value="Edingburgh Airport" />
+            <column name="country" value="United Kingdom" />
+            <column name="latitude" value="55.958785" />
+            <column name="longitude" value="-3.36145352" />
+        </insert>
+
+        <insert tableName="airports">
+            <column name="acronym" value="GLA" />
+            <column name="name" value="Glasgow Airport" />
+            <column name="country" value="United Kingdom" />
+            <column name="latitude" value="55.869074" />
+            <column name="longitude" value="-4.435853" />
+        </insert>
+
+        <insert tableName="airports">
+            <column name="acronym" value="BCN" />
+            <column name="name" value="Barcelona Airport" />
+            <column name="country" value="Spain" />
+            <column name="latitude" value="41.297445" />
+            <column name="longitude" value="2.8832948" />
+        </insert>
+
+        <insert tableName="airports">
+            <column name="acronym" value="IBZ" />
+            <column name="name" value="Ibiza  Airport" />
+            <column name="country" value="Spain" />
+            <column name="latitude" value="38.8748594" />
+            <column name="longitude" value="1.3712232" />
+        </insert>
+
+        <insert tableName="airports">
+            <column name="acronym" value="MAH" />
+            <column name="name" value="Menorca Airport" />
+            <column name="country" value="Spain" />
+            <column name="latitude" value="39.86355" />
+            <column name="longitude" value="4.220772" />
+        </insert>
+
+        <insert tableName="airports">
+            <column name="acronym" value="PMI" />
+            <column name="name" value="Palmas de Mayorca Airport" />
+            <column name="country" value="Spain" />
+            <column name="latitude" value="39.5517487" />
+            <column name="longitude" value="2.73616489" />
+        </insert>
+    </changeSet>
+</databaseChangeLog>
