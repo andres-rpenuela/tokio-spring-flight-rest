@@ -12,7 +12,8 @@
 	<modules>
 		<module>store-api</module>
 		<module>resource-api</module>
-	</modules>
+        <module>email-api</module>
+    </modules>
 
 	<!-- por defecto es "jar"-->
 	<packaging>pom</packaging>
