@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- ChangeSet para crear el trigger BEFORE INSERT en la tabla flights: ejecutar a mano -->
+    <changeSet id="1" author="andres.rpenuela"  context="dba">
+        <sql splitStatements="false">
+            <![CDATA[
+            CREATE DEFINER=`root`@`%` TRIGGER `before_flights_insert` BEFORE INSERT ON `flights` FOR EACH ROW BEGIN
+    -- Check that capacity is non-negative
+    IF NEW.capacity < 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Capacity must be non-negative';
+            END IF;
+
+    -- Check that occupancy is non-negative and does not exceed capacity
+    IF NEW.occupancy < 0 OR NEW.occupancy > NEW.capacity THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Occupancy must be between 0 and capacity';
+            END IF;
+            END
+            ]]>
+        </sql>
+    </changeSet>
+
+    <!-- ChangeSet para crear el trigger BEFORE UPDATE en la tabla flights -->
+    <changeSet id="2" author="andres.rpenuela"  context="dba">
+        <sql splitStatements="false">
+            <![CDATA[
+            CREATE DEFINER=`root`@`%` TRIGGER `before_flights_update` BEFORE UPDATE ON `flights` FOR EACH ROW BEGIN
+                                                                                 -- Check that capacity is non-negative
+                                                                                 IF NEW.capacity < 0 THEN
+                                                                                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Capacity must be non-negative';
+            END IF;
+
+    -- Check that occupancy is non-negative and does not exceed capacity
+    IF NEW.occupancy < 0 OR NEW.occupancy > NEW.capacity THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Occupancy must be between 0 and capacity';
+            END IF;
+            END
+            ]]>
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
