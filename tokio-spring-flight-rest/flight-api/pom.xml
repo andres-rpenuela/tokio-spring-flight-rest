@@ -17,6 +17,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <tsid-creator.version>5.2.6</tsid-creator.version>
+        <model-mapper.version>3.2.1</model-mapper.version>
     </properties>
 
     <dependencies>
@@ -63,5 +64,14 @@
             <artifactId>tsid-creator</artifactId>
             <version>${tsid-creator.version}</version>
         </dependency>
+
+        <!-- mapper -->
+        <!-- https://mvnrepository.com/artifact/org.modelmapper/modelmapper -->
+        <dependency>
+            <groupId>org.modelmapper</groupId>
+            <artifactId>modelmapper</artifactId>
+            <version>${model-mapper.version}</version>
+        </dependency>
+
     </dependencies>
 </project>
