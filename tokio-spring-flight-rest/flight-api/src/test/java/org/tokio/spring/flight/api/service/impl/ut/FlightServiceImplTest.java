@@ -17,6 +17,7 @@ import org.tokio.spring.flight.api.service.impl.FlightServiceImpl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -62,10 +63,10 @@ class FlightServiceImplTest {
         );
 
         // Act - Llamar al metodo bajo prueba
-        List<FlightMvcDTO> flightShowDTOs = service.getAllMvcFlights();
+        List<FlightMvcDTO> flightMvcDTOS = service.getAllMvcFlights();
 
         // Assert - Validar los resultados
-        Assertions.assertThat(flightShowDTOs).isNotNull()
+        Assertions.assertThat(flightMvcDTOS).isNotNull()
                 .hasSize(1)
                 .first()
                 .returns(buildFlightListMock().getFirst().getAirportArrival().getAcronym(),FlightMvcDTO::getAirportArrivalAcronym)
@@ -73,6 +74,32 @@ class FlightServiceImplTest {
                 .returns(buildFlightListMock().getFirst().getNumber(),FlightMvcDTO::getFlightNumber)
                 .returns(buildFlightListMock().getFirst().getId(),FlightMvcDTO::getId);
     }
+
+    @Test
+    void givenFlightId_whenGetFindFLightById_thenReturnMvcFlightDTO() {
+
+        // Arrange - Preparar el mock de `flightReport` y `modelMapper`
+        final Flight flight = buildFlightListMock().getFirst();
+        Mockito.when(flightReport.findById(flight.getId())).thenReturn( Optional.of(flight) );
+
+        // se realiza el mepeo para cada objeto de entrada
+        final ModelMapper mapper = new ModelMapper();
+        Mockito.when(modelMapper.map(any(Flight.class), eq(FlightMvcDTO.class))).thenAnswer(invocationOnMock ->
+                mapper.map(invocationOnMock.getArgument(0), FlightMvcDTO.class)
+        );
+
+        // Act - Llamar al metodo bajo prueba
+        FlightMvcDTO flightMvcDTO = service.getFlightById(flight.getId());
+
+        // Assert - Validar los resultados
+        Assertions.assertThat(flightMvcDTO).isNotNull()
+                .returns(flight.getAirportArrival().getAcronym(),FlightMvcDTO::getAirportArrivalAcronym)
+                .returns(flight.getAirportDeparture().getAcronym(),FlightMvcDTO::getAirportDepartureAcronym)
+                .returns(flight.getNumber(),FlightMvcDTO::getFlightNumber)
+                .returns(flight.getId(),FlightMvcDTO::getId);
+    }
+
+
 
     private List<Flight> buildFlightListMock() {
         final Airport airportArrival = Airport.builder()

@@ -13,6 +13,6 @@ public class APIExceptionHandler {
 
     @ExceptionHandler(FlightException.class)
     public ResponseEntity<String> handleException(HttpServletRequest request, final Exception exception) {
-        return ResponseEntity.badRequest().body("Request %s bad, beacause: %s".formatted(request.getRequestURI(),exception.getMessage()));
+        return ResponseEntity.badRequest().body("Request %s bad, because: %s".formatted(request.getRequestURI(),exception.getMessage()));
     }
 }
