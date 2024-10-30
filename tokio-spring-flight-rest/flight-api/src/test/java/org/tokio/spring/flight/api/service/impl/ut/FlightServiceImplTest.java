@@ -3,20 +3,23 @@ package org.tokio.spring.flight.api.service.impl.ut;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.test.context.ActiveProfiles;
 import org.tokio.spring.flight.api.domain.Airport;
 import org.tokio.spring.flight.api.domain.Flight;
 import org.tokio.spring.flight.api.domain.STATUS_FLIGHT;
+import org.tokio.spring.flight.api.dto.FlightMvcDTO;
 import org.tokio.spring.flight.api.dto.FlightShowDTO;
 import org.tokio.spring.flight.api.report.FlightReport;
 import org.tokio.spring.flight.api.service.impl.FlightServiceImpl;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
@@ -31,22 +34,47 @@ class FlightServiceImplTest {
     @Mock
     private ModelMapper modelMapper;
     @Test
-    void givenCallMethod_whenGetAllFlights_thenReturnFlights() {
+    void givenCallMethod_whenGetAllShowFlights_thenReturnShowFlights() {
 
-        Mockito.when(flightReport.findAll()).thenReturn( buildFlightDTOListMock() );
-        List<FlightShowDTO> flightShowDTOSs = service.getAllFlights();
+        Mockito.when(flightReport.findAll()).thenReturn( buildFlightListMock() );
+        List<FlightShowDTO> flightShowDTOSs = service.getAllShowFlights();
 
         Assertions.assertThat(flightShowDTOSs).isNotNull()
                 .hasSize(1)
                 .first()
-                .returns(buildFlightDTOListMock().getFirst().getAirportArrival().getAcronym(),FlightShowDTO::arrival)
-                .returns(buildFlightDTOListMock().getFirst().getAirportDeparture().getAcronym(),FlightShowDTO::departure)
-                .returns(buildFlightDTOListMock().getFirst().getNumber(),FlightShowDTO::number)
-                .returns(buildFlightDTOListMock().getFirst().getId(),FlightShowDTO::id);
+                .returns(buildFlightListMock().getFirst().getAirportArrival().getAcronym(),FlightShowDTO::arrival)
+                .returns(buildFlightListMock().getFirst().getAirportDeparture().getAcronym(),FlightShowDTO::departure)
+                .returns(buildFlightListMock().getFirst().getNumber(),FlightShowDTO::number)
+                .returns(buildFlightListMock().getFirst().getId(),FlightShowDTO::id);
     }
 
+    @Test
+    void givenCallMethod_whenGetAllMvcFlights_thenReturnShowFlights() {
 
-    private List<Flight> buildFlightDTOListMock() {
+        // Arrange - Preparar el mock de `flightReport` y `modelMapper`
+        final List<Flight> flightListMock = buildFlightListMock();
+        Mockito.when(flightReport.findAll()).thenReturn(flightListMock);
+
+        // se realiza el mepeo para cada objeto de entrada
+        final ModelMapper mapper = new ModelMapper();
+        Mockito.when(modelMapper.map(any(Flight.class), eq(FlightMvcDTO.class))).thenAnswer(invocationOnMock ->
+            mapper.map(invocationOnMock.getArgument(0), FlightMvcDTO.class)
+        );
+
+        // Act - Llamar al metodo bajo prueba
+        List<FlightMvcDTO> flightShowDTOs = service.getAllMvcFlights();
+
+        // Assert - Validar los resultados
+        Assertions.assertThat(flightShowDTOs).isNotNull()
+                .hasSize(1)
+                .first()
+                .returns(buildFlightListMock().getFirst().getAirportArrival().getAcronym(),FlightMvcDTO::getAirportArrivalAcronym)
+                .returns(buildFlightListMock().getFirst().getAirportDeparture().getAcronym(),FlightMvcDTO::getAirportDepartureAcronym)
+                .returns(buildFlightListMock().getFirst().getNumber(),FlightMvcDTO::getFlightNumber)
+                .returns(buildFlightListMock().getFirst().getId(),FlightMvcDTO::getId);
+    }
+
+    private List<Flight> buildFlightListMock() {
         final Airport airportArrival = Airport.builder()
                 .acronym("BCA")
                 .name("Barcelona").build();

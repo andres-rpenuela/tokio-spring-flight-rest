@@ -1,10 +1,9 @@
 package org.tokio.spring.flight.api.controller.ut;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.BDDMockito;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -14,11 +13,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.tokio.spring.flight.api.controller.FlightApiController;
+import org.tokio.spring.flight.api.dto.FlightShowDTO;
 import org.tokio.spring.flight.api.service.FlightService;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @WebMvcTest(controllers = FlightApiController.class)
 @ActiveProfiles("test")
@@ -33,6 +31,7 @@ class FlightApiControllerTest {
     @Test
     void givenGetRequest_whenListFlightsHandler_thenReturnListOfFlights() throws Exception {
         final String requestUrl = "/api/flights/show-flights";
+        Mockito.when(flightService.getAllShowFlights()).thenReturn(buildShowFlights());
         // Perform the request
         MvcResult result = mvc.perform(MockMvcRequestBuilders.get(requestUrl))
                 .andDo(MockMvcResultHandlers.print())
@@ -45,5 +44,15 @@ class FlightApiControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.[0].arrival").value("BCN"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.[0].departure").value("GLA"))
                 .andReturn();
+    }
+
+    /** mock **/
+    private List<FlightShowDTO> buildShowFlights() {
+
+        return List.of(FlightShowDTO.builder()
+                .id(1l)
+                .number("0001")
+                .arrival("BCN")
+                .departure("GLA").build());
     }
 }

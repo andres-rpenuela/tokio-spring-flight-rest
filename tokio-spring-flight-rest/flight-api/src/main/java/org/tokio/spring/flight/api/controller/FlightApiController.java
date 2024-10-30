@@ -5,7 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.tokio.spring.flight.api.dto.FlightMvcDTO;
 import org.tokio.spring.flight.api.dto.FlightShowDTO;
+import org.tokio.spring.flight.api.service.FlightService;
 
 import java.util.List;
 
@@ -14,10 +16,19 @@ import java.util.List;
 @RequestMapping("/api/flights")
 public class FlightApiController {
 
-    @GetMapping({"/show-flights"})
-    public ResponseEntity<List<FlightShowDTO>> listFlightsHandler(){
+    private final FlightService flightService;
 
-        FlightShowDTO flightShowDTO =  new FlightShowDTO(1L,"0001","BCN","GLA");
-        return ResponseEntity.ok(List.of(flightShowDTO));
+    @GetMapping({"/show-flights"})
+    public ResponseEntity<List<FlightShowDTO>> listShowFlightsHandler(){
+
+        List<FlightShowDTO> flightShowDTOS = flightService.getAllShowFlights();
+        return ResponseEntity.ok(flightShowDTOS);
+    }
+
+    @GetMapping({"/list","","/"})
+    public ResponseEntity<List<FlightMvcDTO>> listFlightsHandler(){
+
+        List<FlightMvcDTO> flightMvcDTOS = flightService.getAllMvcFlights();
+        return ResponseEntity.ok(flightMvcDTOS);
     }
 }
