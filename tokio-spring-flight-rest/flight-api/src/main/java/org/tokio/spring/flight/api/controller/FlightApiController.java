@@ -1,17 +1,22 @@
 package org.tokio.spring.flight.api.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.*;
 import org.tokio.spring.flight.api.core.exception.FlightException;
 import org.tokio.spring.flight.api.dto.FlightMvcDTO;
+import org.tokio.spring.flight.api.dto.FlightMvcResponseDTO;
 import org.tokio.spring.flight.api.dto.FlightShowDTO;
 import org.tokio.spring.flight.api.service.FlightService;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,4 +44,35 @@ public class FlightApiController {
         final FlightMvcDTO flightMvcDTO = flightService.getFlightById(id);
         return ResponseEntity.ok(flightMvcDTO);
     }
+
+    @PostMapping("/created")
+        public ResponseEntity<FlightMvcResponseDTO> createFlight(@Valid @RequestBody FlightMvcDTO flightMvcDTO, BindingResult bindingResult) throws FlightException{
+
+        // Verificamos si hay errores de validación
+        if(bindingResult.hasErrors()){
+
+            // Verificamos si hay errores de validación
+            final Map<String, String> errores = bindingResult.getFieldErrors().stream()
+                    .filter(fieldError -> Objects.nonNull(fieldError.getDefaultMessage()) )
+                    .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
+            // TODO implementar validador para status
+            final FlightMvcResponseDTO response = new FlightMvcResponseDTO(errores,flightMvcDTO);
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        // Si no hay errores, continuamos con el procesamiento del usuario
+        // TODO implemntar logica de sercicio para crear
+        final FlightMvcResponseDTO response = new FlightMvcResponseDTO(Collections.emptyMap(),flightMvcDTO);
+        return ResponseEntity.ok().body(response);
+    }
+
+
+    @PutMapping("/updated/{id}")
+    public ResponseEntity<FlightMvcDTO> updateFlight(
+            @PathVariable(value = "id") Long id,
+            @RequestBody FlightMvcDTO flightMvcDTO) throws FlightException{
+        // TODO actualizar vuelo + validacion de datos + test
+        return null;
+    }
+
 }
