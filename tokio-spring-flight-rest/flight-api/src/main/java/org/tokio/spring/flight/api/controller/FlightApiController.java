@@ -5,8 +5,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.tokio.spring.flight.api.core.exception.FlightException;
+import org.tokio.spring.flight.api.core.validation.binding.flight.FlightMvcDTOCustomValidator;
 import org.tokio.spring.flight.api.dto.FlightMvcDTO;
 import org.tokio.spring.flight.api.dto.FlightMvcResponseDTO;
 import org.tokio.spring.flight.api.dto.FlightShowDTO;
@@ -24,6 +26,16 @@ import java.util.stream.Collectors;
 public class FlightApiController {
 
     private final FlightService flightService;
+
+    /** binding validators **/
+    private final FlightMvcDTOCustomValidator flightMvcDTOCustomValidator;
+
+    @InitBinder
+    public final void flightMvcDTOCustomValidator(WebDataBinder webDataBinder) {
+        if (webDataBinder.getTarget() instanceof FlightMvcDTO) {
+            webDataBinder.setValidator(flightMvcDTOCustomValidator);
+        }
+    }
 
     @GetMapping({"/show-flights"})
     public ResponseEntity<List<FlightShowDTO>> listShowFlightsHandler(){
@@ -55,7 +67,6 @@ public class FlightApiController {
             final Map<String, String> errores = bindingResult.getFieldErrors().stream()
                     .filter(fieldError -> Objects.nonNull(fieldError.getDefaultMessage()) )
                     .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
-            // TODO implementar validador para status
             final FlightMvcResponseDTO response = new FlightMvcResponseDTO(errores,flightMvcDTO);
             return ResponseEntity.badRequest().body(response);
         }

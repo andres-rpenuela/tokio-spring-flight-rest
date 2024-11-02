@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.tokio.spring.flight.api.core.validation.annotation.status.FlightStatusRequired;
 
 import java.time.LocalDateTime;
 
@@ -24,9 +25,10 @@ public class FlightMvcDTO {
     private int capacity;
 
     @NotBlank
-    @Pattern(regexp = "\\d{9}[A-Z]{1}")
+    @Pattern(regexp = "[A-Z]{3}\\d{4}")
     private String flightNumber;
 
+    @FlightStatusRequired(target = FlightStatusDTO.class)
     private String status;
 
     @NotNull // para objeto
