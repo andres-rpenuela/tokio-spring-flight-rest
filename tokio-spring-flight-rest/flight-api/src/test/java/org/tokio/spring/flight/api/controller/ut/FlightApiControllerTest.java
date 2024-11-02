@@ -123,7 +123,7 @@ class FlightApiControllerTest {
         mvc.perform(MockMvcRequestBuilders.post("/api/flights/created")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(validFlightJson))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
     }
 
     @Test
@@ -211,15 +211,16 @@ class FlightApiControllerTest {
     @Test
     void givenFlightMvcDtoValid_whenCreatedNew_thenReturnListOfFlightsWithOutErrors() throws Exception {
         final String requestUrl = "/api/flights/created";
-        // TODO HACER ANTES DEL SERIVCIO
+
         final String flightMvcDTO = objectMapper.writeValueAsString( buildFlightMvcDTO());
+        Mockito.when(flightService.createFlight(buildFlightMvcDTO())).thenReturn(buildFlightMvcDTO());
 
         // Perform the request
         MvcResult result = mvc.perform( MockMvcRequestBuilders.post(requestUrl)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(flightMvcDTO))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON)) //"application/json"
                 .andExpect(MockMvcResultMatchers.jsonPath("$").exists())
                 .andExpect(MockMvcResultMatchers.jsonPath("$").isMap())
@@ -237,6 +238,7 @@ class FlightApiControllerTest {
 
         // Convertir el JSON en un objeto FlightMvcDTO
         FlightMvcDTO responseFlightMvcDTO = objectMapper.readValue(flightMvcDTOJson, FlightMvcDTO.class);
+
         Assertions.assertThat(responseFlightMvcDTO)
                 .isNotNull()
                 .returns(buildFlightMvcDTO().getId(),FlightMvcDTO::getId)

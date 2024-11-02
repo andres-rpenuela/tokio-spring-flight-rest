@@ -2,6 +2,7 @@ package org.tokio.spring.flight.api.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -14,7 +15,7 @@ import org.tokio.spring.flight.api.dto.FlightMvcResponseDTO;
 import org.tokio.spring.flight.api.dto.FlightShowDTO;
 import org.tokio.spring.flight.api.service.FlightService;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -59,22 +60,23 @@ public class FlightApiController {
 
     @PostMapping("/created")
         public ResponseEntity<FlightMvcResponseDTO> createFlight(@Valid @RequestBody FlightMvcDTO flightMvcDTO, BindingResult bindingResult) throws FlightException{
-
+        Map<String, String> errores = new HashMap<>();
+        HttpStatus status = HttpStatus.CREATED;
         // Verificamos si hay errores de validación
         if(bindingResult.hasErrors()){
 
             // Verificamos si hay errores de validación
-            final Map<String, String> errores = bindingResult.getFieldErrors().stream()
+            errores = bindingResult.getFieldErrors().stream()
                     .filter(fieldError -> Objects.nonNull(fieldError.getDefaultMessage()) )
                     .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
-            final FlightMvcResponseDTO response = new FlightMvcResponseDTO(errores,flightMvcDTO);
-            return ResponseEntity.badRequest().body(response);
+            status = HttpStatus.BAD_REQUEST;
+        }else{
+            // Si no hay errores, continuamos con el procesamiento del usuario
+            flightMvcDTO = flightService.createFlight(flightMvcDTO);
         }
 
-        // Si no hay errores, continuamos con el procesamiento del usuario
-        // TODO implemntar logica de sercicio para crear
-        final FlightMvcResponseDTO response = new FlightMvcResponseDTO(Collections.emptyMap(),flightMvcDTO);
-        return ResponseEntity.ok().body(response);
+        final FlightMvcResponseDTO response = new FlightMvcResponseDTO(errores,flightMvcDTO);
+        return ResponseEntity.status(status).body(response);
     }
 
 
