@@ -134,6 +134,35 @@ class FlightServiceImplTest {
                 .returns(buildFlightMvcDTOMock().getId(),FlightMvcDTO::getId);
     }
 
+    @Test
+    void givenFlightMvcDTO_whenUpdated_returnOk() {
+        // Configura los mocks
+        Flight flight = buildFlightListMock().getFirst();
+        FlightMvcDTO flightMvcDTO = buildFlightMvcDTOMock();
+        flightMvcDTO.setId(flight.getId());
+
+        // Configurar los mocks para los reportes de aeropuerto
+        Mockito.when(flightReport.findById(1L)).thenReturn(Optional.of(flight));
+
+        Mockito.when(airportReport.findByAcronym("BCN"))
+                .thenReturn(Optional.of(Airport.builder().acronym("BCN").country("Barcelona").build()));
+
+        Mockito.when(modelMapper.map(Mockito.any(Flight.class), Mockito.eq(FlightMvcDTO.class)))
+                .thenReturn(flightMvcDTO);
+        Mockito.when(flightReport.save(Mockito.any(Flight.class))).thenReturn(flight);
+
+        // Ejecuta el metodo del servicio
+        flightMvcDTO = service.updated(flightMvcDTO);
+
+        // Verifica que el DTO fue mapeado y guardado correctamente
+        Mockito.verify(modelMapper).map(Mockito.any(Flight.class), Mockito.eq(FlightMvcDTO.class));
+        Mockito.verify(flightReport).save(Mockito.any(Flight.class));
+
+        // Aserción
+        Assertions.assertThat(flightMvcDTO)
+                .isNotNull()
+                .returns(flight.getId(),FlightMvcDTO::getId);
+    }
 
     private List<Flight> buildFlightListMock() {
         final Airport airportArrival = Airport.builder()

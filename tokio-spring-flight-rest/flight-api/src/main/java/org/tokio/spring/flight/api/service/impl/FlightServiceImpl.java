@@ -6,6 +6,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataAccessException;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.tokio.spring.flight.api.core.exception.FlightException;
 import org.tokio.spring.flight.api.domain.Airport;
@@ -19,6 +20,7 @@ import org.tokio.spring.flight.api.service.FlightService;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -92,6 +94,56 @@ public class FlightServiceImpl implements FlightService {
         return modelMapper.map(flight, FlightMvcDTO.class);
     }
 
+    @Override
+    @Transactional
+    public FlightMvcDTO updated(FlightMvcDTO flightMvcDTO) throws FlightException {
+        if(Objects.isNull(flightMvcDTO)){
+            throw new FlightException("The flight to updated can't be null");
+        }
+
+        Flight flight = flightReport.findById(flightMvcDTO.getId())
+                .orElseThrow(()->
+                        new FlightException("The flight with id %s not found in hte system.".
+                                formatted(flightMvcDTO.getId())));
+
+        final Airport airportDeparture = updatedAirportByAcronym(flight.getAirportDeparture().getAcronym(),flightMvcDTO.getAirportDepartureAcronym())
+                .orElseGet(flight::getAirportDeparture);
+
+        final Airport airportArrival = updatedAirportByAcronym(flight.getAirportArrival().getAcronym(),flightMvcDTO.getAirportArrivalAcronym())
+                .orElseGet(flight::getAirportArrival);
+
+        // update flight
+        flight.setCapacity(flightMvcDTO.getCapacity());
+        flight.setNumber(flightMvcDTO.getFlightNumber());
+        flight.setDepartureTime(flightMvcDTO.getDepartureTime());
+        flight.setAirportArrival(airportArrival);
+        flight.setAirportDeparture(airportDeparture);
+        flight.setStatusFlight(STATUS_FLIGHT.valueOf(flightMvcDTO.getStatus()));
+
+        // updated or create
+        try {
+            flightReport.save(flight);
+        }catch (DataAccessException e){
+            log.error("Can't create flight {0}",e);
+            throw new FlightException("Can't create flight, because: %s ".formatted(e.getMessage()),e);
+        }
+        return modelMapper.map(flight,FlightMvcDTO.class);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    protected Optional<Airport> updatedAirportByAcronym(@NonNull String sourceAcronym, @NonNull String targetAcronym)
+    throws FlightException{
+        if (Objects.equals(sourceAcronym, targetAcronym)) {
+            return Optional.empty();
+        }
+
+        final Airport maybeAirport = airportReport
+                .findByAcronym(targetAcronym)
+                .orElseThrow(() ->
+                        new FlightException("The Airport with Acronym %s not found.".formatted(targetAcronym)));
+
+        return Optional.of(maybeAirport);
+    }
 
     protected static FlightShowDTO mapFlightToFlightShowDTO(@NonNull Flight flight) {
         try {

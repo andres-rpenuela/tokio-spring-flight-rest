@@ -12,4 +12,5 @@ public interface FlightService {
     List<FlightMvcDTO> getAllMvcFlights();
     FlightMvcDTO getFlightById(Long flightId) throws FlightException;
     FlightMvcDTO createFlight(FlightMvcDTO flight) throws FlightException;
+    FlightMvcDTO updated(FlightMvcDTO flightMvcDTO) throws FlightException;
 }

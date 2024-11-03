@@ -80,12 +80,27 @@ public class FlightApiController {
     }
 
 
-    @PutMapping("/updated/{id}")
-    public ResponseEntity<FlightMvcDTO> updateFlight(
-            @PathVariable(value = "id") Long id,
-            @RequestBody FlightMvcDTO flightMvcDTO) throws FlightException{
+    @PutMapping("/updated")
+    public ResponseEntity<FlightMvcResponseDTO> updateFlight(
+            @Valid @RequestBody FlightMvcDTO flightMvcDTO, BindingResult bindingResult) throws FlightException{
         // TODO actualizar vuelo + validacion de datos + test
-        return null;
+        if(flightMvcDTO.getId() == null){
+            throw new FlightException("The id of flights is null");
+        }
+        Map<String, String> errors = new HashMap<>();
+        HttpStatus status = HttpStatus.ACCEPTED;
+        if(bindingResult.hasErrors()){
+            status = HttpStatus.BAD_REQUEST;
+            errors =  bindingResult.getFieldErrors().stream()
+                    .filter(fieldError -> Objects.nonNull(fieldError.getDefaultMessage()) )
+                    .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
+        }else{
+            // Si no hay errores, continuamos con el procesamiento del usuario
+            flightMvcDTO = flightService.updated(flightMvcDTO);
+        }
+
+        final FlightMvcResponseDTO response = new FlightMvcResponseDTO(errors,flightMvcDTO);
+        return ResponseEntity.status(status).body(response);
     }
 
 }
