@@ -73,5 +73,10 @@
             <version>${model-mapper.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.tokio.spring.flight</groupId>
+            <artifactId>resource-api</artifactId>
+            <version>${version}</version>
+        </dependency>
     </dependencies>
 </project>
