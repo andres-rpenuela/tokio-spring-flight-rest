@@ -92,7 +92,9 @@ public class FlightApiController {
 
     @PutMapping("/updated")
     public ResponseEntity<FlightMvcResponseDTO> updateFlight(
-            @Valid @RequestBody FlightMvcDTO flightMvcDTO, BindingResult bindingResult) throws FlightException{
+            @Valid @RequestPart(name="flightMvcDTO") FlightMvcDTO flightMvcDTO, BindingResult bindingResult,
+            @RequestParam(name = "image",required = false) MultipartFile multipartFile,
+            @RequestParam(name = "description",required = false) String description) throws FlightException{
         // TODO actualizar vuelo + validacion de datos + test
         if(flightMvcDTO.getId() == null){
             throw new FlightException("The id of flights is null");
@@ -106,7 +108,12 @@ public class FlightApiController {
                     .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
         }else{
             // Si no hay errores, continuamos con el procesamiento del usuario
-            flightMvcDTO = flightService.updated(flightMvcDTO);
+            if(multipartFile.isEmpty()){
+                flightMvcDTO = flightService.updated(flightMvcDTO);
+            }else{
+                flightMvcDTO = flightService.updated(flightMvcDTO,multipartFile,description);
+            }
+
         }
 
         final FlightMvcResponseDTO response = new FlightMvcResponseDTO(errors,flightMvcDTO);

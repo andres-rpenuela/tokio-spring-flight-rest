@@ -15,4 +15,5 @@ public interface FlightService {
     FlightMvcDTO createFlight(FlightMvcDTO flight) throws FlightException;
     FlightMvcDTO createFlight(FlightMvcDTO flight, MultipartFile multipartFile,String description) throws FlightException;
     FlightMvcDTO updated(FlightMvcDTO flightMvcDTO) throws FlightException;
+    FlightMvcDTO updated(FlightMvcDTO flightMvcDTO, MultipartFile multipartFile, String description) throws FlightException;
 }

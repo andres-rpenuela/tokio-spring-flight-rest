@@ -119,28 +119,39 @@ public class FlightServiceImpl implements FlightService {
                         new FlightException("The flight with id %s not found in hte system.".
                                 formatted(flightMvcDTO.getId())));
 
-        final Airport airportDeparture = updatedAirportByAcronym(flight.getAirportDeparture().getAcronym(),flightMvcDTO.getAirportDepartureAcronym())
-                .orElseGet(flight::getAirportDeparture);
-
-        final Airport airportArrival = updatedAirportByAcronym(flight.getAirportArrival().getAcronym(),flightMvcDTO.getAirportArrivalAcronym())
-                .orElseGet(flight::getAirportArrival);
-
         // update flight
-        flight.setCapacity(flightMvcDTO.getCapacity());
-        flight.setNumber(flightMvcDTO.getFlightNumber());
-        flight.setDepartureTime(flightMvcDTO.getDepartureTime());
-        flight.setAirportArrival(airportArrival);
-        flight.setAirportDeparture(airportDeparture);
-        flight.setStatusFlight(STATUS_FLIGHT.valueOf(flightMvcDTO.getStatus()));
+        populationCreateOrEditFlight(flight,flightMvcDTO,null);
+        return modelMapper.map(flight, FlightMvcDTO.class);
+    }
 
-        // updated or create
-        try {
-            flightReport.save(flight);
-        }catch (DataAccessException e){
-            log.error("Can't create flight {0}",e);
-            throw new FlightException("Can't create flight, because: %s ".formatted(e.getMessage()),e);
+    @Override
+    @Transactional
+    public FlightMvcDTO updated(FlightMvcDTO flightMvcDTO, MultipartFile multipartFile, String description) throws FlightException {
+        if(Objects.isNull(flightMvcDTO)){
+            throw new FlightException("The flight to updated can't be null");
         }
-        return modelMapper.map(flight,FlightMvcDTO.class);
+
+        Flight flight = flightReport.findById(flightMvcDTO.getId())
+                .orElseThrow(()->
+                        new FlightException("The flight with id %s not found in hte system.".
+                                formatted(flightMvcDTO.getId())));
+
+        Resource resource = null;
+        // management resource
+        if ( multipartFile != null || ! multipartFile.isEmpty()){
+            Optional<ResourceDTO>  resourceDTOOptional =  managementResourceService.save(multipartFile,description);
+            resource = resourceDTOOptional.map(resourceDTO -> Resource.builder()
+                            .id(resourceDTO.getId())
+                            .resourceId(resourceDTO.getResourceId())
+                            .size(resourceDTO.getSize())
+                            .contentType(resourceDTO.getContentType())
+                            .fileName(resourceDTO.getFilename())
+                            .build())
+                    .orElseGet(() -> null);
+        }
+
+        populationCreateOrEditFlight(flight,flightMvcDTO,resource);
+        return modelMapper.map(flight, FlightMvcDTO.class);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
