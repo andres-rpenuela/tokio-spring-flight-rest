@@ -8,6 +8,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.tokio.spring.flight.api.core.exception.FlightException;
 import org.tokio.spring.flight.api.core.validation.binding.flight.FlightMvcDTOCustomValidator;
 import org.tokio.spring.flight.api.dto.FlightMvcDTO;
@@ -59,7 +60,10 @@ public class FlightApiController {
     }
 
     @PostMapping("/created")
-        public ResponseEntity<FlightMvcResponseDTO> createFlight(@Valid @RequestBody FlightMvcDTO flightMvcDTO, BindingResult bindingResult) throws FlightException{
+    public ResponseEntity<FlightMvcResponseDTO> createFlight(
+            @Valid @RequestPart(name = "flightMvcDTO") FlightMvcDTO flightMvcDTO, BindingResult bindingResult,
+            @RequestParam(name = "image", required = false) MultipartFile multipartFile,
+            @RequestParam(name = "description", required = false) String description) throws FlightException{
         Map<String, String> errores = new HashMap<>();
         HttpStatus status = HttpStatus.CREATED;
         // Verificamos si hay errores de validación
@@ -71,8 +75,14 @@ public class FlightApiController {
                     .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
             status = HttpStatus.BAD_REQUEST;
         }else{
+
             // Si no hay errores, continuamos con el procesamiento del usuario
-            flightMvcDTO = flightService.createFlight(flightMvcDTO);
+            if (Objects.isNull(multipartFile) || multipartFile.isEmpty()) {
+                flightMvcDTO = flightService.createFlight(flightMvcDTO);
+            } else {
+                flightMvcDTO = flightService.createFlight(flightMvcDTO, multipartFile, description);
+            }
+
         }
 
         final FlightMvcResponseDTO response = new FlightMvcResponseDTO(errores,flightMvcDTO);

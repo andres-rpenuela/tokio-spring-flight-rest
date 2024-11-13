@@ -41,4 +41,6 @@ public class FlightMvcDTO {
 
     @NotBlank
     private String airportArrivalAcronym;
+
+    private String resourceId; // TODO mapper
 }

@@ -2,21 +2,29 @@ package org.tokio.spring.flight.api.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.TransientPropertyValueException;
 import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.tokio.spring.flight.api.core.exception.FlightException;
 import org.tokio.spring.flight.api.domain.Airport;
 import org.tokio.spring.flight.api.domain.Flight;
+import org.tokio.spring.flight.api.domain.Resource;
 import org.tokio.spring.flight.api.domain.STATUS_FLIGHT;
 import org.tokio.spring.flight.api.dto.FlightMvcDTO;
 import org.tokio.spring.flight.api.dto.FlightShowDTO;
+import org.tokio.spring.flight.api.dto.ResourceDTO;
 import org.tokio.spring.flight.api.report.AirportReport;
 import org.tokio.spring.flight.api.report.FlightReport;
+import org.tokio.spring.flight.api.report.ResourceReport;
 import org.tokio.spring.flight.api.service.FlightService;
+import org.tokio.spring.flight.api.service.ManagementResourceService;
 
 import java.util.List;
 import java.util.Objects;
@@ -30,6 +38,7 @@ public class FlightServiceImpl implements FlightService {
     private final FlightReport flightReport;
     private final AirportReport airportReport;
 
+    private final ManagementResourceService managementResourceService;
     private final ModelMapper modelMapper;
 
     @Override
@@ -65,32 +74,36 @@ public class FlightServiceImpl implements FlightService {
     @Override
     @Transactional
     public FlightMvcDTO createFlight(FlightMvcDTO flightMvcDTO) throws FlightException {
-        // TODO
         if(Objects.isNull(flightMvcDTO)) {
             throw new FlightException("flight is null");
         }
 
-        Airport airportArrival = airportReport.findByAcronym(flightMvcDTO.getAirportArrivalAcronym())
-                .orElseThrow(()->new FlightException("The acronym airport %s don't found".formatted(flightMvcDTO.getAirportArrivalAcronym())));
+       Flight flight = populationCreateOrEditFlight(Flight.builder().build(),flightMvcDTO,null);
+       return modelMapper.map(flight, FlightMvcDTO.class);
+    }
 
-        Airport airportDeparture = airportReport.findByAcronym(flightMvcDTO.getAirportDepartureAcronym())
-                .orElseThrow(()->new FlightException("The acronym airport %s don't found".formatted(flightMvcDTO.getAirportDepartureAcronym())));
-
-        Flight flight = Flight.builder()
-                .airportArrival(airportArrival)
-                .airportDeparture(airportDeparture)
-                .capacity(flightMvcDTO.getCapacity())
-                .number(flightMvcDTO.getFlightNumber())
-                .departureTime(flightMvcDTO.getDepartureTime())
-                .statusFlight(STATUS_FLIGHT.valueOf(flightMvcDTO.getStatus()))
-                .build();
-
-        try {
-            flightReport.save(flight);
-        }catch (DataAccessException e){
-            log.error("Can't create flight {0}",e);
-            throw new FlightException("Can't create flight, because: %s ".formatted(e.getMessage()),e);
+    @Override
+    @Transactional
+    public FlightMvcDTO createFlight(FlightMvcDTO flightMvcDTO, MultipartFile multipartFile, String description) throws FlightException {
+        if(Objects.isNull(flightMvcDTO)){
+            throw new FlightException("Can't be null flight");
         }
+
+        Resource resource = null;
+        if(!multipartFile.isEmpty()){
+
+            Optional<ResourceDTO>  resourceDTOOptional =  managementResourceService.save(multipartFile,description);
+                resource = resourceDTOOptional.map(resourceDTO -> Resource.builder()
+                                .id(resourceDTO.getId())
+                                .resourceId(resourceDTO.getResourceId())
+                                .size(resourceDTO.getSize())
+                                .contentType(resourceDTO.getContentType())
+                                .fileName(resourceDTO.getFilename())
+                                .build())
+                        .orElseGet(() -> null);
+        }
+
+        Flight flight = populationCreateOrEditFlight(Flight.builder().build(),flightMvcDTO,resource);
         return modelMapper.map(flight, FlightMvcDTO.class);
     }
 
@@ -132,7 +145,7 @@ public class FlightServiceImpl implements FlightService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     protected Optional<Airport> updatedAirportByAcronym(@NonNull String sourceAcronym, @NonNull String targetAcronym)
-    throws FlightException{
+            throws FlightException{
         if (Objects.equals(sourceAcronym, targetAcronym)) {
             return Optional.empty();
         }
@@ -157,5 +170,36 @@ public class FlightServiceImpl implements FlightService {
             log.error("Error to map Flight to FlightShowDTO ",e);
             return null;
         }
+    }
+
+    private Flight populationCreateOrEditFlight(Flight flight, FlightMvcDTO flightMvcDTO,Resource resource) throws FlightException,DataAccessException{
+        Airport airportArrival = airportReport.findByAcronym(flightMvcDTO.getAirportArrivalAcronym())
+                .orElseThrow(()->new FlightException("The acronym airport %s don't found".formatted(flightMvcDTO.getAirportArrivalAcronym())));
+
+        Airport airportDeparture = airportReport.findByAcronym(flightMvcDTO.getAirportDepartureAcronym())
+                .orElseThrow(()->new FlightException("The acronym airport %s don't found".formatted(flightMvcDTO.getAirportDepartureAcronym())));
+
+        flight.setAirportArrival(airportArrival);
+        flight.setAirportDeparture(airportDeparture);
+        flight.setCapacity(flightMvcDTO.getCapacity());
+        flight.setNumber(flightMvcDTO.getFlightNumber());
+        flight.setDepartureTime(flightMvcDTO.getDepartureTime());
+        flight.setStatusFlight(STATUS_FLIGHT.valueOf(flightMvcDTO.getStatus()));
+
+        if(Objects.nonNull(resource)) {
+            flight.setFlightImg(resource);
+        }
+
+        try {
+            flightReport.save(flight);
+        }catch (TransientPropertyValueException | DataAccessException e){
+            if( Objects.nonNull( flight.getFlightImg() )) { // deleted
+                managementResourceService.deleteImage(flight.getFlightImg().getResourceId());
+            }
+            log.error("Can't create flight {0}",e);
+            throw new FlightException("Can't create flight, because: %s ".formatted(e.getMessage()),e);
+        }
+
+        return flight;
     }
 }
