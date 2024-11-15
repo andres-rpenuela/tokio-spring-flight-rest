@@ -128,4 +128,10 @@ public class FlightApiController {
         return ResponseEntity.ok()
                 .body(flightService.deleteImageAndGet(idFlight,resourceId));
     }
+
+    @GetMapping("/find/{idFlight}")
+    public ResponseEntity<FlightMvcDTO> getFlightByIdHandler(@PathVariable(value = "idFlight") Long idFlight){
+        return ResponseEntity.ok()
+                .body(flightService.getFlightById(idFlight));
+    }
 }
