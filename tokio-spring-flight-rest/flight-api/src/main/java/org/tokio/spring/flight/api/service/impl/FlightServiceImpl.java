@@ -5,13 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.TransientPropertyValueException;
 import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.tokio.spring.flight.api.core.exception.FlightException;
 import org.tokio.spring.flight.api.domain.Airport;
 import org.tokio.spring.flight.api.domain.Flight;
@@ -22,13 +20,14 @@ import org.tokio.spring.flight.api.dto.FlightShowDTO;
 import org.tokio.spring.flight.api.dto.ResourceDTO;
 import org.tokio.spring.flight.api.report.AirportReport;
 import org.tokio.spring.flight.api.report.FlightReport;
-import org.tokio.spring.flight.api.report.ResourceReport;
 import org.tokio.spring.flight.api.service.FlightService;
 import org.tokio.spring.flight.api.service.ManagementResourceService;
+import org.tokio.spring.resources.core.exception.ResourceException;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -152,6 +151,46 @@ public class FlightServiceImpl implements FlightService {
 
         populationCreateOrEditFlight(flight,flightMvcDTO,resource);
         return modelMapper.map(flight, FlightMvcDTO.class);
+    }
+
+    @Override
+    @Transactional
+    public void deleteImage(UUID resourceId) throws FlightException, ResourceException, IllegalArgumentException{
+        Flight flight = flightReport.findAll()
+                .stream()
+                .filter(flightDTO -> Objects.nonNull(flightDTO.getFlightImg()) &&
+                        resourceId.equals(flightDTO.getFlightImg().getResourceId())
+                )
+                .findFirst()
+                .orElseThrow(()->
+                        new IllegalArgumentException("flight with resource %s not found!".formatted(resourceId)));
+
+        try {
+            managementResourceService.deleteImage(resourceId);
+            flight.setFlightImg(null);
+            flightReport.save(flight);
+        }catch (ResourceException e){
+            log.error("Don't removed flight image because: {0}",e);
+            throw e;
+        }
+    }
+
+    @Override
+    @Transactional
+    public FlightMvcDTO deleteImageAndGet(Long idFLight, UUID resourceId) throws FlightException, ResourceException {
+        FlightMvcDTO flightMvcDTO = getFlightById(idFLight);
+        if( !Objects.equals(flightMvcDTO.getFlightImg(),resourceId.toString())){
+            throw new FlightException("The resource id don't match");
+        }
+        deleteImage(resourceId);
+        return getFlightById(idFLight);
+    }
+
+    @Override
+    public Optional<FlightMvcDTO> findFlightById(Long idFlight) {
+        return Optional.ofNullable(idFlight)
+                .map(flightReport::findById)
+                .map(flight -> modelMapper.map(flight, FlightMvcDTO.class));
     }
 
     @Transactional(propagation = Propagation.REQUIRED)

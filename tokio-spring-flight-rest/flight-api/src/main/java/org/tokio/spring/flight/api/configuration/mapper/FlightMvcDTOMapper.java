@@ -18,6 +18,7 @@ public class FlightMvcDTOMapper{
     }
 
     private void addConverts(){
-        this.modelMapper.typeMap(Resource.class,String.class).setConverter(new ResourceResourceIdToStringReosurceIdConverter());
+        this.modelMapper.typeMap(Resource.class, String.class)
+                .setConverter(mappingContext -> new ResourceResourceIdToStringReosurceIdConverter().convert(mappingContext));
     }
 }

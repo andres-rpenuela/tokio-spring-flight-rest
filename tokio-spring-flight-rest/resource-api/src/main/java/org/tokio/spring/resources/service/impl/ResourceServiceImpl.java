@@ -139,7 +139,7 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public void deleteResource(@NonNull UUID resourceId) {
+    public void deleteResource(@NonNull UUID resourceId) throws ResourceException {
         final FilenameFilter filenameFilter = (dir, name) -> name.contains("%s".formatted(resourceId));
         final File[] filesByName = resourceConfigurationProperties
                 .buildResourcePathFromRelativePathGivenNameResource()
@@ -151,6 +151,7 @@ public class ResourceServiceImpl implements ResourceService {
                 Files.deleteIfExists(file.toPath());
             } catch (IOException e) {
                 log.error("Error in deleteResource, cause: {0}",e);
+                throw new ResourceException("Error in deleteResource cause",e);
             }
         });
 

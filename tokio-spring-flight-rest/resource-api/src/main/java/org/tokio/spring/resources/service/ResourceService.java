@@ -13,6 +13,6 @@ import java.util.UUID;
 public interface ResourceService {
     Optional<ResourceIdDTO> saveResource(@NonNull MultipartFile multipartFile, @Nullable String description) throws ResourceException;
     Optional<ResourceContentDTO> findResource(@NonNull UUID resourceId);
-    void deleteResource(@NonNull UUID resourceId);
+    void deleteResource(@NonNull UUID resourceId) throws ResourceException;
 
 }

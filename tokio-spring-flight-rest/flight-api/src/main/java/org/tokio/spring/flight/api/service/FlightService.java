@@ -6,6 +6,8 @@ import org.tokio.spring.flight.api.dto.FlightMvcDTO;
 import org.tokio.spring.flight.api.dto.FlightShowDTO;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public interface FlightService {
 
@@ -16,4 +18,9 @@ public interface FlightService {
     FlightMvcDTO createFlight(FlightMvcDTO flight, MultipartFile multipartFile,String description) throws FlightException;
     FlightMvcDTO updated(FlightMvcDTO flightMvcDTO) throws FlightException;
     FlightMvcDTO updated(FlightMvcDTO flightMvcDTO, MultipartFile multipartFile, String description) throws FlightException;
+
+    Optional<FlightMvcDTO> findFlightById(Long idFlight);
+    void deleteImage(UUID resourceId) throws FlightException, IllegalArgumentException;
+    FlightMvcDTO deleteImageAndGet(Long idFLight,UUID resourceId) throws FlightException;
+
 }

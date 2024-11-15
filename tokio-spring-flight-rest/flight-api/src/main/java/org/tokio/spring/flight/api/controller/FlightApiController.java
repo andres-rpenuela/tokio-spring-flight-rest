@@ -2,6 +2,7 @@ package org.tokio.spring.flight.api.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -16,11 +17,11 @@ import org.tokio.spring.flight.api.dto.FlightMvcResponseDTO;
 import org.tokio.spring.flight.api.dto.FlightShowDTO;
 import org.tokio.spring.flight.api.service.FlightService;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
 @RequiredArgsConstructor
@@ -120,4 +121,11 @@ public class FlightApiController {
         return ResponseEntity.status(status).body(response);
     }
 
+
+    @RequestMapping(value = "/removeImg",method = {GET,DELETE})
+    public ResponseEntity<FlightMvcDTO> removeResourceHandler(@RequestParam(value = "idFlight") Long idFlight,
+                                              @RequestParam(value = "rsc") UUID resourceId){
+        return ResponseEntity.ok()
+                .body(flightService.deleteImageAndGet(idFlight,resourceId));
+    }
 }

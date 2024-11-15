@@ -42,5 +42,5 @@ public class FlightMvcDTO {
     @NotBlank
     private String airportArrivalAcronym;
 
-    private String resourceId; // TODO mapper
+    private String flightImg; // mismo nombre que en Flight.class, para que el converte del mapper lo gestione automaticamente
 }
