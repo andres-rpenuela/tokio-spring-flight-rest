@@ -1,6 +1,8 @@
 package org.tokio.spring.flight.api.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -12,9 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.tokio.spring.flight.api.core.exception.FlightException;
 import org.tokio.spring.flight.api.core.validation.binding.flight.FlightMvcDTOCustomValidator;
-import org.tokio.spring.flight.api.dto.FlightMvcDTO;
-import org.tokio.spring.flight.api.dto.FlightMvcResponseDTO;
-import org.tokio.spring.flight.api.dto.FlightShowDTO;
+import org.tokio.spring.flight.api.dto.*;
 import org.tokio.spring.flight.api.service.FlightService;
 
 import java.util.*;
@@ -133,5 +133,20 @@ public class FlightApiController {
     public ResponseEntity<FlightMvcDTO> getFlightByIdHandler(@PathVariable(value = "idFlight") Long idFlight){
         return ResponseEntity.ok()
                 .body(flightService.getFlightById(idFlight));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<PageDTO<FlightShowDTO>> searchFlightsHandler(
+            @Valid @RequestParam(value="number",required = false) String number,
+            @Valid @RequestParam(value="page",required = false,defaultValue = "0") int page,
+            @Valid @Min(1) @Max(100) @RequestParam(value="page_size",required = false,defaultValue = "10") int pageSize
+    ){
+        final FlightSearchRequestDTO flightSearchRequestDTO = FlightSearchRequestDTO.builder()
+                .number(number)
+                .page(page)
+                .pageSize(pageSize).build();
+
+        PageDTO<FlightShowDTO> flightShowDTOPageDTO = flightService.searchFlights(flightSearchRequestDTO);
+        return ResponseEntity.ok(flightShowDTOPageDTO);
     }
 }

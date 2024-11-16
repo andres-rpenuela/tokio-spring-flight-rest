@@ -2,6 +2,7 @@ package org.tokio.spring.flight.api.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.TransientPropertyValueException;
 import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataAccessException;
@@ -15,9 +16,7 @@ import org.tokio.spring.flight.api.domain.Airport;
 import org.tokio.spring.flight.api.domain.Flight;
 import org.tokio.spring.flight.api.domain.Resource;
 import org.tokio.spring.flight.api.domain.STATUS_FLIGHT;
-import org.tokio.spring.flight.api.dto.FlightMvcDTO;
-import org.tokio.spring.flight.api.dto.FlightShowDTO;
-import org.tokio.spring.flight.api.dto.ResourceDTO;
+import org.tokio.spring.flight.api.dto.*;
 import org.tokio.spring.flight.api.report.AirportReport;
 import org.tokio.spring.flight.api.report.FlightReport;
 import org.tokio.spring.flight.api.service.FlightService;
@@ -28,6 +27,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -187,6 +187,46 @@ public class FlightServiceImpl implements FlightService {
     }
 
     @Override
+    public PageDTO<FlightShowDTO> searchFlights(FlightSearchRequestDTO flightSearchRequestDTO) {
+        if( Objects.isNull( flightSearchRequestDTO )){
+            throw new FlightException("Flight search request cannot be null");
+        }
+        List<Flight> flights = flightReport.findAll();
+
+        List<Flight> filteredFlights = Optional.of(flightSearchRequestDTO)
+                .map(FlightSearchRequestDTO::getNumber)
+                .map(StringUtils::trimToNull)
+                .map(StringUtils::lowerCase)
+                .map(filter -> flights.stream().filter(flight -> {
+                    final String genre = flight.getNumber();
+                    return  genre != null ? genre.toLowerCase().contains(filter) : null;
+                }).toList()).orElseGet(()->flights);
+
+        // inicio = pagina (0,1...) * tamaño (1,2,...)
+        final int start = flightSearchRequestDTO.getPage() * flightSearchRequestDTO.getPageSize();
+
+        if( start <0 ||  start >= filteredFlights.size() ){ // No hay elementos que mostrar
+            return PageDTO.<FlightShowDTO>builder()
+                    .items(List.of())
+                    .page(flightSearchRequestDTO.getPage())
+                    .pageSize(flightSearchRequestDTO.getPageSize())
+                    .total(filteredFlights.size()).build();
+        }
+
+        final int end = Math.min(start + flightSearchRequestDTO.getPageSize(), filteredFlights.size());
+
+        final List<FlightShowDTO> items =
+                IntStream.range(start,end).mapToObj(filteredFlights::get)
+                        .map(this::fillFlightShowDTO).toList();
+
+        return PageDTO.<FlightShowDTO>builder()
+                .items(items)
+                .page(flightSearchRequestDTO.getPage())
+                .pageSize(flightSearchRequestDTO.getPageSize())
+                .total(filteredFlights.size()).build();
+    }
+
+    @Override
     public Optional<FlightMvcDTO> findFlightById(Long idFlight) {
         return Optional.ofNullable(idFlight)
                 .map(flightReport::findById)
@@ -251,5 +291,14 @@ public class FlightServiceImpl implements FlightService {
         }
 
         return flight;
+    }
+
+    private FlightShowDTO fillFlightShowDTO(@NonNull Flight flight){
+        return FlightShowDTO.builder()
+                .id(flight.getId())
+                .number(flight.getNumber())
+                .arrival(flight.getAirportArrival().getAcronym())
+                .departure(flight.getAirportDeparture().getAcronym())
+                .build();
     }
 }

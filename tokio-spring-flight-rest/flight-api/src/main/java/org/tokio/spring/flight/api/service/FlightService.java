@@ -3,7 +3,9 @@ package org.tokio.spring.flight.api.service;
 import org.springframework.web.multipart.MultipartFile;
 import org.tokio.spring.flight.api.core.exception.FlightException;
 import org.tokio.spring.flight.api.dto.FlightMvcDTO;
+import org.tokio.spring.flight.api.dto.FlightSearchRequestDTO;
 import org.tokio.spring.flight.api.dto.FlightShowDTO;
+import org.tokio.spring.flight.api.dto.PageDTO;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,4 +25,5 @@ public interface FlightService {
     void deleteImage(UUID resourceId) throws FlightException, IllegalArgumentException;
     FlightMvcDTO deleteImageAndGet(Long idFLight,UUID resourceId) throws FlightException;
 
+    PageDTO<FlightShowDTO> searchFlights(FlightSearchRequestDTO flightSearchRequestDTO) throws FlightException;
 }
