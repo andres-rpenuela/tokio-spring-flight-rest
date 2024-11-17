@@ -18,13 +18,20 @@ public class FlightBookingApiController {
     @PutMapping("/confirm")
     public ResponseEntity<FlightBookingDTO> confirmBookingHandler(@RequestParam(name = "flight_id") Long flightId,
                                                                   @RequestParam(name = "user_id") String userId) {
-        final  FlightBookingDTO flightBookingDTO = flightBookingService.newBookingFlight(flightId,userId);
+        final FlightBookingDTO flightBookingDTO = flightBookingService.newBookingFlight(flightId, userId);
         return ResponseEntity.ok(flightBookingDTO);
     }
 
     @GetMapping("/flights")
-    public ResponseEntity<List<FlightBookingDTO>> searchFlightsBookingsByFlightIdHandler(@RequestParam(name = "flight_id") Long flightId){
+    public ResponseEntity<List<FlightBookingDTO>> searchFlightsBookingsByFlightIdHandler(@RequestParam(name = "flight_id") Long flightId) {
         List<FlightBookingDTO> flightBookingDTOS = flightBookingService.searchBookingsByFlightId(flightId);
+
+        return ResponseEntity.ok(flightBookingDTOS);
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<FlightBookingDTO>> searchFlightsBookingsByUserIdHandler(@RequestParam(name = "user_id") String userId) {
+        List<FlightBookingDTO> flightBookingDTOS = flightBookingService.searchBookingsByUserId(userId);
 
         return ResponseEntity.ok(flightBookingDTOS);
     }

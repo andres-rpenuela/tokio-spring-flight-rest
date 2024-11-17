@@ -2,6 +2,7 @@ package org.tokio.spring.flight.api.service;
 
 import org.tokio.spring.flight.api.core.exception.FlightException;
 import org.tokio.spring.flight.api.core.exception.OverBookingException;
+import org.tokio.spring.flight.api.core.exception.UserException;
 import org.tokio.spring.flight.api.dto.FlightBookingDTO;
 
 import java.util.List;
@@ -13,4 +14,5 @@ public interface FlightBookingService {
     Set<FlightBookingDTO> findAllBooking();
 
     List<FlightBookingDTO> searchBookingsByFlightId(Long flightId) throws FlightException;
+    List<FlightBookingDTO> searchBookingsByUserId(String userId) throws UserException;
 }

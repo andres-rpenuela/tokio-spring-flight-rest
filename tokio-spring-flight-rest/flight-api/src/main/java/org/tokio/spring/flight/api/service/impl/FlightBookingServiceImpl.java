@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.tokio.spring.flight.api.core.exception.FlightException;
 import org.tokio.spring.flight.api.core.exception.OverBookingException;
+import org.tokio.spring.flight.api.core.exception.UserException;
 import org.tokio.spring.flight.api.domain.Flight;
 import org.tokio.spring.flight.api.domain.FlightBooking;
 import org.tokio.spring.flight.api.domain.User;
@@ -68,6 +69,16 @@ public class FlightBookingServiceImpl implements FlightBookingService {
         List<FlightBookingDTO> flightBookingDTOS = new ArrayList<>();
         List<FlightBooking> flightBookings = Optional.ofNullable(flightId)
                         .map(bookingReport::findByFlightId).orElseThrow(()->new FlightException("Flight with id: %s not found!".formatted(flightId)));
+
+        flightBookings.stream().forEach(flightBooking -> flightBookingDTOS.add(modelMapper.map(flightBooking, FlightBookingDTO.class)));
+        return flightBookingDTOS;
+    }
+
+    @Override
+    public List<FlightBookingDTO> searchBookingsByUserId(String userId) throws UserException {
+        List<FlightBookingDTO> flightBookingDTOS = new ArrayList<>();
+        List<FlightBooking> flightBookings = Optional.ofNullable(userId)
+                .map(bookingReport::findByUserId).orElseThrow(()->new FlightException("User with id: %s not found!".formatted(userId)));
 
         flightBookings.stream().forEach(flightBooking -> flightBookingDTOS.add(modelMapper.map(flightBooking, FlightBookingDTO.class)));
         return flightBookingDTOS;
