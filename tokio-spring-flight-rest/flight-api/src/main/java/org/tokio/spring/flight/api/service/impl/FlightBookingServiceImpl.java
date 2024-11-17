@@ -15,10 +15,7 @@ import org.tokio.spring.flight.api.report.FlightReport;
 import org.tokio.spring.flight.api.report.UserReport;
 import org.tokio.spring.flight.api.service.FlightBookingService;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -65,4 +62,16 @@ public class FlightBookingServiceImpl implements FlightBookingService {
     public Set<FlightBookingDTO> findAllBooking() {
         return Set.of();
     }
+
+    @Override
+    public List<FlightBookingDTO> searchBookingsByFlightId(Long flightId) throws FlightException {
+        List<FlightBookingDTO> flightBookingDTOS = new ArrayList<>();
+        List<FlightBooking> flightBookings = Optional.ofNullable(flightId)
+                        .map(bookingReport::findByFlightId).orElseThrow(()->new FlightException("Flight with id: %s not found!".formatted(flightId)));
+
+        flightBookings.stream().forEach(flightBooking -> flightBookingDTOS.add(modelMapper.map(flightBooking, FlightBookingDTO.class)));
+        return flightBookingDTOS;
+    }
+
+
 }

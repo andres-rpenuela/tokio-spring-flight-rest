@@ -17,6 +17,7 @@ public class FlightBookingDtoMapper {
     }
 
     private void init() {
+
         this.modelMapper.typeMap(UUID.class, String.class)
                 .setConverter(mappingContext -> new UUIDLocatorToStringLocatorConverter().convert(mappingContext));
     }

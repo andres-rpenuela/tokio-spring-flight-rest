@@ -2,12 +2,11 @@ package org.tokio.spring.flight.api.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.tokio.spring.flight.api.dto.FlightBookingDTO;
 import org.tokio.spring.flight.api.service.FlightBookingService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -23,4 +22,11 @@ public class FlightBookingApiController {
         return ResponseEntity.ok(flightBookingDTO);
     }
 
+    @GetMapping("/flights")
+    public ResponseEntity<List<FlightBookingDTO>> searchFlightsBookingsByFlightIdHandler(@RequestParam(name = "flight_id") Long flightId){
+        List<FlightBookingDTO> flightBookingDTOS = flightBookingService.searchBookingsByFlightId(flightId);
+
+        return ResponseEntity.ok(flightBookingDTOS);
+
+    }
 }
