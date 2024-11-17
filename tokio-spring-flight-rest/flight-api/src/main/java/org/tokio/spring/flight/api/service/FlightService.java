@@ -2,10 +2,7 @@ package org.tokio.spring.flight.api.service;
 
 import org.springframework.web.multipart.MultipartFile;
 import org.tokio.spring.flight.api.core.exception.FlightException;
-import org.tokio.spring.flight.api.dto.FlightMvcDTO;
-import org.tokio.spring.flight.api.dto.FlightSearchRequestDTO;
-import org.tokio.spring.flight.api.dto.FlightShowDTO;
-import org.tokio.spring.flight.api.dto.PageDTO;
+import org.tokio.spring.flight.api.dto.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +12,8 @@ public interface FlightService {
 
     List<FlightShowDTO> getAllShowFlights();
     List<FlightMvcDTO> getAllMvcFlights();
+
+    FlightDTO getFlightDTOById(Long flightId) throws FlightException;
     FlightMvcDTO getFlightById(Long flightId) throws FlightException;
     FlightMvcDTO createFlight(FlightMvcDTO flight) throws FlightException;
     FlightMvcDTO createFlight(FlightMvcDTO flight, MultipartFile multipartFile,String description) throws FlightException;

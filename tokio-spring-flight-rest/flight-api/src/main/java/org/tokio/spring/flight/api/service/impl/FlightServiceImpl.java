@@ -60,6 +60,14 @@ public class FlightServiceImpl implements FlightService {
     }
 
     @Override
+    public FlightDTO getFlightDTOById(Long flightId) throws FlightException {
+
+        return flightReport.findById(flightId)
+                .map(flight -> modelMapper.map(flight,FlightDTO.class))
+                .orElseThrow(()->new FlightException("flight don't found! "));
+    }
+
+    @Override
     public FlightMvcDTO getFlightById(Long flightId) throws FlightException {
         if(Objects.isNull(flightId)) {
             throw new FlightException("flight id is null");
