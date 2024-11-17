@@ -2,6 +2,8 @@ package org.tokio.spring.flight.api.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,6 +11,8 @@ import org.tokio.spring.flight.api.domain.Resource;
 import org.tokio.spring.flight.api.dto.ResourceDTO;
 import org.tokio.spring.flight.api.report.ResourceReport;
 import org.tokio.spring.flight.api.service.ManagementResourceService;
+import org.tokio.spring.resources.core.exception.ResourceException;
+import org.tokio.spring.resources.dto.ResourceContentDTO;
 import org.tokio.spring.resources.dto.ResourceIdDTO;
 import org.tokio.spring.resources.service.ResourceService;
 
@@ -51,9 +55,10 @@ public class ManagementResourceServiceImpl implements ManagementResourceService 
     }
 
     @Override
-    public ResourceDTO getResourceContent(UUID resourceId) {
-        // TODO
-        return null;
+    public ResourceDTO getResourceContent(UUID resourceId) throws ResourceException {
+        return resourceService.findResource(resourceId)
+                .map(ManagementResourceServiceImpl::mapperResourceContentToResourceDto)
+                .orElseThrow(()->new ResourceException("Resource don't find!"));
     }
 
     @Override
@@ -66,5 +71,15 @@ public class ManagementResourceServiceImpl implements ManagementResourceService 
         resourceReport.findByResourceId(resourceId)
                 .ifPresent(resourceReport::delete);
 
+    }
+
+    private static ResourceDTO mapperResourceContentToResourceDto(ResourceContentDTO resourceContentDto) {
+        return ResourceDTO.builder()
+                .resourceId(resourceContentDto.resourceId())
+                .filename(resourceContentDto.resourceName())
+                .size(resourceContentDto.size())
+                .contentType(resourceContentDto.contentType())
+                .content(resourceContentDto.content())
+                .build();
     }
 }
