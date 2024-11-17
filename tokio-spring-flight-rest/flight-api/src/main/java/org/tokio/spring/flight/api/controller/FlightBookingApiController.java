@@ -27,6 +27,5 @@ public class FlightBookingApiController {
         List<FlightBookingDTO> flightBookingDTOS = flightBookingService.searchBookingsByFlightId(flightId);
 
         return ResponseEntity.ok(flightBookingDTOS);
-
     }
 }
