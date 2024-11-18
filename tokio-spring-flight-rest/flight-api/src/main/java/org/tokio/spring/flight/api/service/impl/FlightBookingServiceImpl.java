@@ -17,6 +17,7 @@ import org.tokio.spring.flight.api.report.UserReport;
 import org.tokio.spring.flight.api.service.FlightBookingService;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -61,7 +62,8 @@ public class FlightBookingServiceImpl implements FlightBookingService {
 
     @Override
     public Set<FlightBookingDTO> findAllBooking() {
-        return Set.of();
+        List<FlightBooking> flightBookings = bookingReport.findAll();
+        return flightBookings.stream().map(flightBooking -> modelMapper.map(flightBooking, FlightBookingDTO.class)).collect(Collectors.toSet());
     }
 
     @Override

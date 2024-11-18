@@ -9,6 +9,7 @@ import java.util.List;
 @Repository
 public interface BookingReport extends CrudRepository<FlightBooking, Long> {
 
+    List<FlightBooking> findAll();
     List<FlightBooking> findByFlightId(Long flightId);
     List<FlightBooking> findByUserId(String userId);
 }

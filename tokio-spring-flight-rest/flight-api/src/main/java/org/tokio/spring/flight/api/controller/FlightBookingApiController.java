@@ -7,6 +7,7 @@ import org.tokio.spring.flight.api.dto.FlightBookingDTO;
 import org.tokio.spring.flight.api.service.FlightBookingService;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -22,6 +23,10 @@ public class FlightBookingApiController {
         return ResponseEntity.ok(flightBookingDTO);
     }
 
+    @GetMapping({"","/","/all"})
+    public ResponseEntity<Set<FlightBookingDTO>> getAllBookingsHandler() {
+        return ResponseEntity.ok( flightBookingService.findAllBooking() );
+    }
     @GetMapping("/flights")
     public ResponseEntity<List<FlightBookingDTO>> searchFlightsBookingsByFlightIdHandler(@RequestParam(name = "flight_id") Long flightId) {
         List<FlightBookingDTO> flightBookingDTOS = flightBookingService.searchBookingsByFlightId(flightId);
