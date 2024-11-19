@@ -34,7 +34,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<UserDTO> findByEmail(String email) {
-        return Optional.empty();
+    @Transactional(readOnly = true)
+    public Optional<UserDTO> findByEmail(String email) throws UserException {
+        final String maybeEmail = Optional.ofNullable(email)
+                .map(StringUtils::stripToNull)
+                .orElseThrow(()->new UserException("Email not allow"));
+
+        return userReport.findByEmail(maybeEmail)
+                .map(user -> modelMapper.map(user, UserDTO.class));
     }
 }

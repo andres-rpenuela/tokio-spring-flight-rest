@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface UserService {
     Optional<Pair<UserDTO,String>> findUserAndPasswordByEmail(String mail) throws UserException;
-    Optional<UserDTO> findByEmail(String email);
+    Optional<UserDTO> findByEmail(String email) throws UserException;
 }
