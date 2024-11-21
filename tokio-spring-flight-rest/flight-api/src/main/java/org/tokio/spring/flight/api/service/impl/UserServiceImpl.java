@@ -17,6 +17,7 @@ import org.tokio.spring.flight.api.report.UserReport;
 import org.tokio.spring.flight.api.service.UserService;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -55,22 +56,45 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserFormDTO created(@NonNull UserFormDTO userFormDTO) throws UserException {
-        if ( userReport.findByEmail(userFormDTO.getEmail()).isPresent() ) {
+        final String maybeEmail = StringUtils.stripToNull(userFormDTO.getEmail());
+        if ( userReport.findByEmail(maybeEmail).isPresent() ) {
              throw new UserException("Email already in use");
         }
 
         // return collection empty, if the parma is null or not found in bbdd
-        Set<Role> roles = roleReport.getRolesBySetNames(userFormDTO.getRoles());
-
-        if( roles.isEmpty() ) {
-            throw new UserException("Roles cannot be empty");
-        }
+        Set<Role> roles = getRoles(userFormDTO);
 
         User user = new User();
         fillUserFromUserFormDTO(user,userFormDTO,roles);
         user = userReport.save(user);
 
         return modelMapper.map(user, UserFormDTO.class);
+    }
+
+    @Override
+    @Transactional
+    public UserFormDTO updated(String userId, UserFormDTO userFormDTO) throws UserException {
+        User user = userReport.findById(userId).orElseThrow(()->new UserException("User not found"));
+        final String maybeEmail = StringUtils.stripToNull(userFormDTO.getEmail());
+        if(!Objects.equals(user.getEmail(),maybeEmail) && userReport.findByEmail(maybeEmail).isPresent()){
+            throw new UserException("Email already in use");
+        }
+
+
+        Set<Role> roles = getRoles(userFormDTO);
+        fillUserFromUserFormDTO(user,userFormDTO,roles);
+        user = userReport.save(user);
+
+        return modelMapper.map(user, UserFormDTO.class);
+    }
+
+    private Set<Role> getRoles(UserFormDTO userFormDTO) {
+        // return collection empty, if the parma is null or not found in bbdd
+        Set<Role> roles = roleReport.getRolesBySetNames(userFormDTO.getRoles());
+        if( roles.isEmpty() ) {
+            throw new UserException("Roles cannot be empty");
+        }
+        return roles;
     }
 
     private static void fillUserFromUserFormDTO(@NonNull User user, @NonNull UserFormDTO userFormDTO, @NonNull Set<Role> roles){

@@ -62,6 +62,8 @@ public class UserApiController {
             errors = bindingResult.getAllErrors();
         }
         // TODO Created
+        userFormDTO = userService.updated(userId, userFormDTO);
+
         return ResponseEntity.status(status).body(new ResponseDTO<>(errors, userFormDTO));
     }
 }

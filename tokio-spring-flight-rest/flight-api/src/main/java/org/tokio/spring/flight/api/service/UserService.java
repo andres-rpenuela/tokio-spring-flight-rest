@@ -1,5 +1,6 @@
 package org.tokio.spring.flight.api.service;
 
+import jakarta.validation.Valid;
 import org.modelmapper.internal.Pair;
 import org.springframework.lang.NonNull;
 import org.tokio.spring.flight.api.core.exception.UserException;
@@ -13,4 +14,5 @@ public interface UserService {
     Optional<UserDTO> findByEmail(String email) throws UserException;
 
     UserFormDTO created(@NonNull UserFormDTO userFormDTO) throws UserException;
+    UserFormDTO updated(@NonNull String userId, @NonNull UserFormDTO userFormDTO) throws UserException;
 }
