@@ -48,6 +48,7 @@ public class UserApiController {
             errors = bindingResult.getAllErrors();
         }
         // TODO Create
+        userFormDTO = userService.created(userFormDTO);
         return ResponseEntity.status(status).body(new ResponseDTO<>(errors, userFormDTO));
     }
 

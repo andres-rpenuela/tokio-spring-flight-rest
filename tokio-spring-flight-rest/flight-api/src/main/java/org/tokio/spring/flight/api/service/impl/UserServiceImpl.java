@@ -4,20 +4,28 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.internal.Pair;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.tokio.spring.flight.api.core.exception.UserException;
+import org.tokio.spring.flight.api.domain.Role;
+import org.tokio.spring.flight.api.domain.User;
 import org.tokio.spring.flight.api.dto.UserDTO;
+import org.tokio.spring.flight.api.dto.UserFormDTO;
+import org.tokio.spring.flight.api.report.RoleReport;
 import org.tokio.spring.flight.api.report.UserReport;
 import org.tokio.spring.flight.api.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserReport userReport;
+    private final RoleReport roleReport;
     private final ModelMapper modelMapper;
 
     @Override
@@ -42,5 +50,36 @@ public class UserServiceImpl implements UserService {
 
         return userReport.findByEmail(maybeEmail)
                 .map(user -> modelMapper.map(user, UserDTO.class));
+    }
+
+    @Override
+    @Transactional
+    public UserFormDTO created(@NonNull UserFormDTO userFormDTO) throws UserException {
+        if ( userReport.findByEmail(userFormDTO.getEmail()).isPresent() ) {
+             throw new UserException("Email already in use");
+        }
+
+        // return collection empty, if the parma is null or not found in bbdd
+        Set<Role> roles = roleReport.getRolesBySetNames(userFormDTO.getRoles());
+
+        if( roles.isEmpty() ) {
+            throw new UserException("Roles cannot be empty");
+        }
+
+        User user = new User();
+        fillUserFromUserFormDTO(user,userFormDTO,roles);
+        user = userReport.save(user);
+
+        return modelMapper.map(user, UserFormDTO.class);
+    }
+
+    private static void fillUserFromUserFormDTO(@NonNull User user, @NonNull UserFormDTO userFormDTO, @NonNull Set<Role> roles){
+        user.setId(userFormDTO.getId());
+        user.setName(userFormDTO.getName());
+        user.setCreated(LocalDateTime.now());
+        user.setEmail(userFormDTO.getEmail());
+        user.setSurname(userFormDTO.getSurname());
+        user.setPassword(userFormDTO.getPassword());
+        user.setRoles(roles);
     }
 }
