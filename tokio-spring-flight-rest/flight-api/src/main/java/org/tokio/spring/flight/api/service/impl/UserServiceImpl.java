@@ -5,15 +5,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.internal.Pair;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.tokio.spring.flight.api.core.exception.UserException;
+import org.tokio.spring.flight.api.domain.Resource;
 import org.tokio.spring.flight.api.domain.Role;
 import org.tokio.spring.flight.api.domain.User;
+import org.tokio.spring.flight.api.dto.ResourceDTO;
 import org.tokio.spring.flight.api.dto.UserDTO;
 import org.tokio.spring.flight.api.dto.UserFormDTO;
 import org.tokio.spring.flight.api.report.RoleReport;
 import org.tokio.spring.flight.api.report.UserReport;
+import org.tokio.spring.flight.api.service.ManagementResourceService;
 import org.tokio.spring.flight.api.service.UserService;
 
 import java.time.LocalDateTime;
@@ -27,6 +32,9 @@ public class UserServiceImpl implements UserService {
 
     private final UserReport userReport;
     private final RoleReport roleReport;
+
+    private final ManagementResourceService managementResourceService;
+
     private final ModelMapper modelMapper;
 
     @Override
@@ -73,6 +81,37 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    public UserFormDTO created(UserFormDTO userFormDTO, MultipartFile multipartFile, String description) throws UserException {
+        final String maybeEmail = StringUtils.stripToNull(userFormDTO.getEmail());
+        if ( userReport.findByEmail(maybeEmail).isPresent() ) {
+            throw new UserException("Email already in use");
+        }
+
+        // return collection empty, if the parma is null or not found in bbdd
+        Set<Role> roles = getRoles(userFormDTO);
+
+        // magnament imag user
+        Resource resource = null;
+        if(multipartFile != null && !multipartFile.isEmpty()) {
+            Optional<ResourceDTO> imag = managementResourceService.save(multipartFile,description);
+            resource = imag.map(resourceDTO -> Resource.builder()
+                    .id(resourceDTO.getId())
+                    .size(resourceDTO.getSize())
+                    .fileName(resourceDTO.getFilename())
+                    .resourceId(resourceDTO.getResourceId())
+                    .contentType(resourceDTO.getContentType())
+                    .build()).orElseGet(()->null);
+        }
+
+        User user = new User();
+        fillUserFromUserFormDTO(user,userFormDTO,roles,resource);
+        user = userReport.save(user);
+
+        return modelMapper.map(user, UserFormDTO.class);
+    }
+
+    @Override
+    @Transactional
     public UserFormDTO updated(String userId, UserFormDTO userFormDTO) throws UserException {
         User user = userReport.findById(userId).orElseThrow(()->new UserException("User not found"));
         final String maybeEmail = StringUtils.stripToNull(userFormDTO.getEmail());
@@ -86,6 +125,11 @@ public class UserServiceImpl implements UserService {
         user = userReport.save(user);
 
         return modelMapper.map(user, UserFormDTO.class);
+    }
+
+    @Override
+    public UserFormDTO updated(String userId, UserFormDTO userFormDTO, MultipartFile multipartFile, String description) throws UserException {
+        return null;
     }
 
     private Set<Role> getRoles(UserFormDTO userFormDTO) {
@@ -104,6 +148,13 @@ public class UserServiceImpl implements UserService {
         user.setEmail(userFormDTO.getEmail());
         user.setSurname(userFormDTO.getSurname());
         user.setPassword(userFormDTO.getPassword());
+        user.setActive(Boolean.TRUE);
+        user.setRoles(roles);
+    }
+
+    private static void fillUserFromUserFormDTO(@NonNull User user, @NonNull UserFormDTO userFormDTO, @NonNull Set<Role> roles, @Nullable Resource resource){
+        fillUserFromUserFormDTO(user,userFormDTO,roles);
+        user.setUserImage(resource);
         user.setRoles(roles);
     }
 }

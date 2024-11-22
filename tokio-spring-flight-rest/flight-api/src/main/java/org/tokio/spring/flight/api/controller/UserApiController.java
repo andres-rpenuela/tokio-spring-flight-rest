@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.tokio.spring.flight.api.core.exception.UserException;
 import org.tokio.spring.flight.api.dto.ResponseDTO;
 import org.tokio.spring.flight.api.dto.UserDTO;
@@ -49,6 +50,23 @@ public class UserApiController {
         }
         // TODO Create
         userFormDTO = userService.created(userFormDTO);
+        return ResponseEntity.status(status).body(new ResponseDTO<>(errors, userFormDTO));
+    }
+
+    @PostMapping(value = "/created-with-img")
+    public ResponseEntity<ResponseDTO<UserFormDTO>> addUserFullHandler(
+            @Valid @RequestPart(name = "userFormDTO") UserFormDTO userFormDTO, BindingResult bindingResult,
+            @RequestParam(name = "image", required = false) MultipartFile multipartFile,
+            @RequestParam(name = "description", required = false) String description){
+        HttpStatus status = HttpStatus.OK;
+        List<ObjectError> errors = null;
+
+        if(bindingResult.hasErrors()){
+            status = HttpStatus.BAD_REQUEST;
+            errors = bindingResult.getAllErrors();
+        }
+        // TODO Create
+        userFormDTO = userService.created(userFormDTO,multipartFile,description);
         return ResponseEntity.status(status).body(new ResponseDTO<>(errors, userFormDTO));
     }
 
