@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -129,7 +130,36 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserFormDTO updated(String userId, UserFormDTO userFormDTO, MultipartFile multipartFile, String description) throws UserException {
-        return null;
+        User user = userReport.findById(userId).orElseThrow(()->new UserException("User not found"));
+        final String maybeEmail = StringUtils.stripToNull(userFormDTO.getEmail());
+        if(!Objects.equals(user.getEmail(),maybeEmail) && userReport.findByEmail(maybeEmail).isPresent()){
+            throw new UserException("Email already in use");
+        }
+
+        // return collection empty, if the parma is null or not found in bbdd
+        Set<Role> roles = getRoles(userFormDTO);
+
+        // magnament imag user
+        final UUID userImgOld = Optional.ofNullable(user.getUserImage()).map(Resource::getResourceId).orElseGet(()->null);
+        Resource resource = null;
+        if(multipartFile != null && !multipartFile.isEmpty()) {
+            Optional<ResourceDTO> imag = managementResourceService.save(multipartFile,description);
+            resource = imag.map(resourceDTO -> Resource.builder()
+                    .id(resourceDTO.getId())
+                    .size(resourceDTO.getSize())
+                    .fileName(resourceDTO.getFilename())
+                    .resourceId(resourceDTO.getResourceId())
+                    .contentType(resourceDTO.getContentType())
+                    .build()).orElseGet(()->null);
+            if(resource != null && !Objects.equals(resource.getResourceId(),userImgOld)) {
+                managementResourceService.deleteImage(userImgOld);
+            }
+        }
+
+        fillUserFromUserFormDTO(user,userFormDTO,roles,resource);
+        user = userReport.save(user);
+
+        return modelMapper.map(user, UserFormDTO.class);
     }
 
     private Set<Role> getRoles(UserFormDTO userFormDTO) {

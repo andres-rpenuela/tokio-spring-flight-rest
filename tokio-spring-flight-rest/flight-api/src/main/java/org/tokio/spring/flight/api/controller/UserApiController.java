@@ -48,7 +48,7 @@ public class UserApiController {
             status = HttpStatus.BAD_REQUEST;
             errors = bindingResult.getAllErrors();
         }
-        // TODO Create
+
         userFormDTO = userService.created(userFormDTO);
         return ResponseEntity.status(status).body(new ResponseDTO<>(errors, userFormDTO));
     }
@@ -65,7 +65,7 @@ public class UserApiController {
             status = HttpStatus.BAD_REQUEST;
             errors = bindingResult.getAllErrors();
         }
-        // TODO Create
+
         userFormDTO = userService.created(userFormDTO,multipartFile,description);
         return ResponseEntity.status(status).body(new ResponseDTO<>(errors, userFormDTO));
     }
@@ -81,6 +81,25 @@ public class UserApiController {
         }
         // TODO Created
         userFormDTO = userService.updated(userId, userFormDTO);
+
+        return ResponseEntity.status(status).body(new ResponseDTO<>(errors, userFormDTO));
+    }
+
+    @PutMapping("/updated-with-img/{id}")
+    public ResponseEntity<ResponseDTO<UserFormDTO>> addUserHandler(
+            @PathVariable(name="id") String userId,
+            @Valid @RequestPart("userFormDTO") UserFormDTO userFormDTO, BindingResult bindingResult,
+            @RequestParam(name = "image", required = false) MultipartFile multipartFile,
+            @RequestParam(name = "description", required = false) String description){
+        HttpStatus status = HttpStatus.OK;
+        List<ObjectError> errors = null;
+
+        if(bindingResult.hasErrors()){
+            status = HttpStatus.BAD_REQUEST;
+            errors = bindingResult.getAllErrors();
+        }
+
+        userFormDTO = userService.updated(userId, userFormDTO,multipartFile,description);
 
         return ResponseEntity.status(status).body(new ResponseDTO<>(errors, userFormDTO));
     }

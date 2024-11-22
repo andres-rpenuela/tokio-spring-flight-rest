@@ -26,4 +26,6 @@ public class UserFormDTO {
     private String email;
     @RoleValid(target = ROLES.class)
     private List<String> roles;
+
+    private String image;
 }

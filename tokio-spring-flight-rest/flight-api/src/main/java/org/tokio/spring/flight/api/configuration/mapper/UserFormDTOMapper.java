@@ -2,6 +2,7 @@ package org.tokio.spring.flight.api.configuration.mapper;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Configuration;
+import org.tokio.spring.flight.api.converter.ResourceResourceIdToStringReosurceIdConverter;
 import org.tokio.spring.flight.api.converter.SetRoleToListRoleDTO;
 import org.tokio.spring.flight.api.domain.User;
 import org.tokio.spring.flight.api.dto.UserFormDTO;
@@ -18,6 +19,7 @@ public class UserFormDTOMapper {
 
     private void init() {
         this.modelMapper.typeMap(User.class, UserFormDTO.class)
-                .addMappings(mapping -> mapping.using(new SetRoleToListRoleDTO()).map(User::getRoles, UserFormDTO::setRoles));
+                .addMappings(mapping -> mapping.using(new SetRoleToListRoleDTO()).map(User::getRoles, UserFormDTO::setRoles))
+                .addMappings(mapping -> mapping.using(new ResourceResourceIdToStringReosurceIdConverter()).map(User::getUserImage,UserFormDTO::setImage));
     }
 }
