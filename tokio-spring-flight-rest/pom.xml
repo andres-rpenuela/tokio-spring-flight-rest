@@ -14,7 +14,7 @@
 		<module>resource-api</module>
         <module>email-api</module>
 		<module>flight-api</module>
-	</modules>
+    </modules>
 
 	<!-- por defecto es "jar"-->
 	<packaging>pom</packaging>

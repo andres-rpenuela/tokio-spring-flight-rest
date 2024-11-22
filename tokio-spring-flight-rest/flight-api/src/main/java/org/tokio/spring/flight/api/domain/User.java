@@ -46,6 +46,10 @@ public class User {
     inverseJoinColumns = { @JoinColumn(name="role_id")})
     private Set<Role> roles;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="resource_id",referencedColumnName = "id")
+    private Resource userImage;
+
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "user")
     private Set<FlightBooking> flightBookings;
 
