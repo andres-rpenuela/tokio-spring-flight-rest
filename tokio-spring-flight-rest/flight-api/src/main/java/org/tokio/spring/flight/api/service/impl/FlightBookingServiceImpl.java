@@ -1,7 +1,9 @@
 package org.tokio.spring.flight.api.service.impl;
 
+import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.tokio.spring.flight.api.core.exception.FlightException;
@@ -29,8 +31,11 @@ public class FlightBookingServiceImpl implements FlightBookingService {
 
     private final ModelMapper modelMapper;
 
+    private final AuthenticatedUserService authenticatedUserService;
+
     @Override
     @Transactional
+    @PreAuthorize(value = "isAuthenticated()")
     public FlightBookingDTO newBookingFlight(Long flightId, String userId) throws FlightException, OverBookingException {
         final Flight flight = flightReport.findById(flightId)
                 .orElseThrow(()-> new FlightException("Flight with id: %s not found!".formatted(flightId)));
@@ -61,12 +66,14 @@ public class FlightBookingServiceImpl implements FlightBookingService {
     }
 
     @Override
+    @PreAuthorize(value = "hasAnyAuthority('ADMIN')")
     public Set<FlightBookingDTO> findAllBooking() {
         List<FlightBooking> flightBookings = bookingReport.findAll();
         return flightBookings.stream().map(flightBooking -> modelMapper.map(flightBooking, FlightBookingDTO.class)).collect(Collectors.toSet());
     }
 
     @Override
+    @PreAuthorize(value = "hasAnyAuthority('ADMIN')")
     public List<FlightBookingDTO> searchBookingsByFlightId(Long flightId) throws FlightException {
         List<FlightBookingDTO> flightBookingDTOS = new ArrayList<>();
         List<FlightBooking> flightBookings = Optional.ofNullable(flightId)
@@ -77,10 +84,14 @@ public class FlightBookingServiceImpl implements FlightBookingService {
     }
 
     @Override
-    public List<FlightBookingDTO> searchBookingsByUserId(String userId) throws UserException {
+    //@PreAuthorize("@authenticatedUserService.hasId(#id)")
+    public List<FlightBookingDTO> searchBookingsByUserId(@Nonnull String id) throws UserException {
+        if(!authenticatedUserService.hasId(id)){
+            throw new UserException("User not authorized!");
+        }
         List<FlightBookingDTO> flightBookingDTOS = new ArrayList<>();
-        List<FlightBooking> flightBookings = Optional.ofNullable(userId)
-                .map(bookingReport::findByUserId).orElseThrow(()->new FlightException("User with id: %s not found!".formatted(userId)));
+        List<FlightBooking> flightBookings = Optional.of(id)
+                .map(bookingReport::findByUserId).orElseThrow(()->new FlightException("User with id: %s not found!".formatted(id)));
 
         flightBookings.stream().forEach(flightBooking -> flightBookingDTOS.add(modelMapper.map(flightBooking, FlightBookingDTO.class)));
         return flightBookingDTOS;
