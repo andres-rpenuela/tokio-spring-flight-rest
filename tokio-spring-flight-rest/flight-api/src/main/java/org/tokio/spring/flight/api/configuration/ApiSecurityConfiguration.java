@@ -29,6 +29,7 @@ public class ApiSecurityConfiguration {
                 // habilitar csrf y cors por defecto
                 .csrf(Customizer.withDefaults())
                 //.cors(Customizer.withDefaults())
+                .httpBasic(Customizer.withDefaults())
                 .build();
     }
 }
