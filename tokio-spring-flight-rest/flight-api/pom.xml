@@ -73,6 +73,7 @@
             <version>${model-mapper.version}</version>
         </dependency>
 
+        <!-- resources -->
         <dependency>
             <groupId>org.tokio.spring.flight</groupId>
             <artifactId>resource-api</artifactId>
@@ -83,6 +84,13 @@
                     <artifactId>spring-boot-starter-data-jpa</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <!-- security -->
+        <dependency>
+            <groupId>org.tokio.spring.flight</groupId>
+            <artifactId>security-api</artifactId>
+            <version>${version}</version>
         </dependency>
     </dependencies>
 </project>
