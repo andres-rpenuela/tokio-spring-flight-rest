@@ -1,0 +1,88 @@
+spring:
+  application:
+    name: flight-mvc-app
+  # Port
+  port: 8080
+  # Docker compose
+  docker:
+    compose:
+      enabled: false
+  # maria db docker
+  datasource:
+    url: jdbc:h2:mem:test_mail_db;MODE=MariaDB;DATABASE_TO_LOWER=TRUE;
+    username: sa
+    password: password
+    driver-class-name: org.h2.Driver
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+    #validate, none, update, create-drop
+    hibernate:
+      ddl-auto: create-drop
+    # Debug queries
+    show-sql: true
+  test:
+    database:
+      replace: none
+  # i18n configuration, without message source bean
+  #messages:
+  #  basename: message/message
+  #  fallback-to-system-locale: true
+  # Liquibase
+  liquibase:
+    enabled: false
+# Multipart
+  servlet:
+    multipart:
+      max-file-size: 2MB
+# Email
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: andresruizpenuela@gmail.com
+    password: mwriyygpfuoeirbi
+    properties:
+      mail:
+        debug: true
+        transport:
+          protocol: smtp
+        smtp:
+          port: 25
+          auth: true
+          starttls:
+            enable: true
+            required: true
+# DEBUG LOGS
+#logging:
+#  level:
+#    org:
+#      h2: DEBUG
+#    "liquibase": DEBUG
+    #Para ver los parámetros de las querys
+    #org.hibernate.SQL: DEBUG
+    #org.hibernate.orm.jdbc.bind: TRACE
+
+# Actuator:
+# Activar endpoints predefinidos: management.endpoints.web.exposure.include= .....
+# Desactivar un edpoint: management.endpoint.health.enable= false/true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, bean, info, auditevents, env, sessions, shutdown, metrics, prometheus, logfile, loggers, configprops, conditions
+  endpoint:
+    health:
+      enabled: false
+# define property, path where saved the resources
+# store
+# C:/Users/andre/eclipse-workspace/GitLab/TokioSpring/spring-boot-controller/flight-app-working-files
+# NameClass.class.getLoader().getaPath() + ../flight-app-working-files
+# Nota: si la ruta empiza por ../NameFolderOrFile o /../NameFolderOrFile,
+# da el error: "The resource path has been normalized to [null]",
+# para solventarlo debe empezar con /NameFolderOrFile or NomeFolderOrFile
+# o cambiar el tipo de objeto a Stirng y luego crear el path
+application:
+  store:
+    absolute-path: C:\\Users\\andre\\Documents\\SourceTree\\TokioSpringFlightRest\\resources
+    relative-path: ..\\resources
