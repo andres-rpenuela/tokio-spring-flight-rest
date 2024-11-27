@@ -97,3 +97,9 @@ application:
   store:
     absolute-path: C:\\Users\\andre\\Documents\\SourceTree\\TokioSpringFlightRest\\resources
     relative-path: ..\\resources
+
+path:
+  resource:
+    content:
+      absolute-path: C:\\Users\\andre\\Documents\\SourceTree\\TokioSpringFlightRest\\resources
+      relative-path: ..\\resources
