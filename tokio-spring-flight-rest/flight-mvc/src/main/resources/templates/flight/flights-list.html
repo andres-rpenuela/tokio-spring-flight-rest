@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<!--/@ thymesVar id="title" type="java.lang.String" */-->
+<!--/@ thymesVar id="flights" type="org.tokio.spring.flight.dto.FlightDTO>" */-->
+
+<head th:replace="~{/flight/fragments/common/head :: head(${title})}"></head>
+<body>
+<header>
+    <nav th:replace="~{/flight/fragments/common/nav}"></nav>
+</header>
+
+<div class="row py-5 container">
+    <h1 class="border-bottom">Flight Web Application: List</h1>
+    <hr>
+    <span th:if="${flights.isEmpty()}">
+        No hay vuelos!
+    </span>
+    <span th:unless="${flights.isEmpty()}">
+        <div class="row py-5 container">
+            <div class="row">
+                <h1 class="border-bottom">Flights.</h1>
+            </div>
+            <div class="row">
+                <div class="col" th:each="flight : ${flights}">
+                    <div class="card" style="width: 18rem;">
+                        <img th:if="${flight.flightImg == null}" th:src="@{/images/flight-default.jpg}" class="card-img-top img-fluid" alt="image">
+                        <img th:unless="${flight.flightImg  == null}" th:src="@{/flight/resources(rsc=${flight.flightImg})}" class="card-img-top img-fluid" alt="image">
+
+                        <div class="card-body">
+                            <p class="card-text" th:text="${flight.number}"></p>
+                            <hr>
+                            <p class="card-text" th:text="${flight.status}"></p>
+                            <p class="card-text">
+                                <span th:text="${flight.airportDepartureAcronym}"></span>
+                                <span> - </span>
+                                <span th:text="${flight.airportArrivalAcronym}"></span>
+                            </p>
+
+                            <p class="card-text">
+                                <span th:text="${#temporals.format(flight.departureTime,'dd-MM-yyy HH:mm')}"></span>
+                            </p>
+
+                            <p class="card-text">
+                                <span th:text="${flight.capacity}"></span> / <span th:text="${flight.occupancy}"></span>
+                            </p>
+                        </div>
+                        <div class="card-footer">
+                            <!-- request param>> ?flightId=id -->
+                            <!--
+                            <a th:href="@{/flight/flight-edit?flightId={flightId}(flightId=${flight.id})}" th:text="'Editar'"
+                               class="btn btn-primary"/>
+                             -->
+                            <!-- path varaible>> /id -->
+                            <a th:href="@{/flight/flight-edit/{flightId}(flightId=${flight.id})}" th:text="'Editar'" sec:authorize="hasAuthority('ADMIN')"
+                               class="btn btn-primary"/>
+                            <a th:href="@{/flight/bookings/new/{flightId}(flightId=${flight.id})}" th:text="'Reservar'"
+                               class="btn btn-primary"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br><span th:text="#{flights.result.list(${flights.size()})}"></span>
+    </span>
+</div>
+
+<footer class="container">
+    Footer Sticky
+</footer>
+
+<div th:replace="~{flight/fragments/common/scripts}"></div>
+</body>
+</html>

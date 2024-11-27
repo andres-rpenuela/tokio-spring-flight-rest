@@ -8,13 +8,13 @@ spring:
     compose:
       enabled: true
       lifecycle-management: start_and_stop
-      file: ./docker-compose-dev.yml
+      file: ./docker-compose-mvc.yml
   # maria db docker
   datasource:
-    url: jdbc:mysql://localhost:3306/flight?allowPublicKeyRetrieval=true&useSSL=false
+    url: jdbc:mariadb://localhost:3307/flight?createDatabaseIfNotExist=true
     username: root
-    password: rootpassword
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    password: dbpw
+    driver-class-name: org.mariadb.jdbc.Driver
   jpa:
     properties:
       hibernate:
@@ -52,7 +52,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: andresruizpenuela@gmail.com
-    password: mwriyygpfuoeirbi
+    password: ${EMAIL_PWD}
     properties:
       mail:
         debug: true

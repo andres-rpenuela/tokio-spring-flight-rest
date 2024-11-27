@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<!--/@ thymesVar id="title" type="java.lang.String" */-->
+<head th:replace="~{/flight/fragments/common/head :: head(${title})}"></head>
+<body>
+    <header>
+        <nav th:replace="~{/flight/fragments/common/nav}"></nav>
+    </header>
+
+    <div class="row py-5 container">
+        <h1 class="border-bottom">Flight Web Application</h1>
+    </div>
+
+    <footer class="container">
+        Footer Sticky
+    </footer>
+
+    <div th:replace="~{flight/fragments/common/scripts}"></div>
+</body>
+</html>

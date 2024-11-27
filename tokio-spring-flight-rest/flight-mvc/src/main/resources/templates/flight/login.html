@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{/flight/fragments/common/head :: head(#{login.title})}"></head>
+<body>
+    <header>
+        <nav th:replace="~{/flight/fragments/common/nav}"></nav>
+    </header>
+
+    <div class="row py-5 container">
+        <h1 class="border-bottom" th:text="#{login.title}">Flight Web Application</h1>
+    </div>
+
+    <div th:if="${param.error}">
+        <div class="alert alert-danger" role="alert">
+            Invalid username and password.
+        </div>
+    </div>
+
+    <form th:action="@{/login}" method="post">
+        <div class="mb-3 row">
+            <label for="username" class="col-md-2 col-form-label">Username</label>
+            <div class="col-md-5">
+                <input type="text" class="form-control" id="username" name="username" placeholder="username">
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="password" class="col-md-2 col-form-label">Password</label>
+            <div class="col-md-5">
+                <input type="password" class="form-control" id="password" name="password" placeholder="password">
+            </div>
+        </div>
+        <div class="offset-md-2">
+            <button type="submit" class="btn btn-primary">Login</button>
+        </div>
+
+    </form>
+
+    <footer class="container">
+        Footer Sticky
+    </footer>
+
+    <div th:replace="~{flight/fragments/common/scripts}"></div>
+</body>
+</html>

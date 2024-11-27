@@ -1,0 +1,53 @@
+<nav th:fragment="nav()"
+     xmlns="http://www.w3.org/1999/xhtml"
+     xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+     class="navbar navbar-expand-lg bg-body-tertiary">
+
+    <div class="container-fluid">
+        <a class="navbar-brand" th:href="@{/flight}">
+            <i class="bi bi-bootstrap" th:text="#{flight.nav.flight-app}">FlightApp</i>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <!-- mostrar si esta autenticado -->
+                <li  sec:authorize="isAuthenticated()" class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                       aria-expanded="false"  th:text="#{flight.nav.flights}">
+                        Flights
+                    </a>
+
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" th:href="@{/flight/flights}"
+                               th:text="#{flight.nav.list}">List</a></li>
+                        <li sec:authorize="hasAuthority('ADMIN')"><a class="dropdown-item" th:href="@{/flight/flight-edit}"
+                               th:text="#{flight.nav.edit}">Edit</a></li>
+                    </ul>
+                </li>
+
+                <li sec:authorize="isAuthenticated()" class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                       aria-expanded="false"  th:text="#{flight.nav.user}">
+                        User
+                    </a>
+
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" disabled="" sec:authentication="name"></a></li>
+                        <li><hr class="dropdown dropdown-divider"></li>
+                        <li>
+                            <form method="post" th:action="@{/logout}">
+                                <button type="submit" class="btn-primary dropdown-item" th:text="#{login.logout.title}"></button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <a class="navbar-link" hfer="#" th:href="@{''(lang='en')}" th:if="${#locale.language == 'es'}" th:text="#{flight.nav.language.en}">English</a>
+            <a class="navbar-link" hfer="#" th:href="@{''(lang='es')}" th:if="${#locale.language == 'en'}" th:text="#{flight.nav.language.es}">Castellano</a>
+        </div>
+    </div>
+
+</nav>
