@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<!--/@ thymesVar id="locator" type="java.lang.String" *-->
+
+<head th:replace="~{/flight/fragments/common/head :: head(${title})}"></head>
+<body>
+<header>
+    <nav th:replace="~{/flight/fragments/common/nav}"></nav>
+</header>
+
+<div class="container">
+    <div class="row py-5 mb-3">
+        <h1>Flight Web Application: Bookings Confirm</h1>
+    </div>
+    <hr>
+    <div class="alert alert-primary" role="alert" th:text="${locator}">
+        locator
+    </div>
+</div>
+
+<footer class="container">
+    Footer Sticky
+</footer>
+
+<div th:replace="~{flight/fragments/common/scripts}"></div>
+</body>
+</html>

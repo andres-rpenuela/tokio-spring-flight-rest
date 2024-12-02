@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<!--/@ thymesVar id="title" type="java.lang.String" */-->
+<!--/@ thymesVar id="error" type="com.tokioschool.flightapp.flight.dto.ErrorDTO" */-->
+
+<head th:replace="~{/flight/fragments/common/head :: head(${title})}"></head>
+<body>
+<header>
+    <nav th:replace="~{/flight/fragments/common/nav}"></nav>
+</header>
+
+<div class="container">
+    <div class="row py-5 mb-3">
+        <h1 class="border-bottom"><strong th:text="#{flight.error.title}">Oppops, an error ocurred</strong></h1>
+    </div>
+
+
+    <div class="row py-5">
+        <dl>
+            <dt  th:text="#{flight.error.url}">Request URL:</dt>
+            <dd th:text="${error.getUrl()}">url</dd>
+            <dt  th:text="#{flight.error.msg}">Exception message:</dt>
+            <dd th:text="${error.getException()}">exception</dd>
+        </dl>
+    </div>
+</div>
+
+<footer class="container">
+    Footer Sticky
+</footer>
+
+<div th:replace="~{flight/fragments/common/scripts}"></div>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<!-- definir variables en thymeleaf a partir de un parámetro recibido del controllador -->
+<!--*/ @thymesVar id="flight" type="org.tokio.spring.flight.dto.FlightMvcDTO" */-->
+<!--*/ @thymesVar id="airports" type="org.tokio.spring.flight.dto.AirportDTO" */-->
+<!--*/ @thymesVar id="resourceImageId" type="java.util.UUID" */-->
+
+<head th:replace="~{/flight/fragments/common/head :: head('FligthApp')}">
+<body>
+<header>
+    <nav th:replace="~{/flight/fragments/common/nav}"/>
+</header>
+
+<div class="row py-5 container"  sec:authorize="isAuthenticated() && hasAuthority('ADMIN')">
+    <div class="row">
+        <h1 class="border-bottom">Flights.</h1>
+    </div>
+    <div class="row">
+        <form th:action="@{/flight/flight-edit/{id}(id=${flight.getId()})}"
+              th:object="${flight}"
+              method="post"
+              enctype="multipart/form-data"
+              class="col-md-8">
+            <!-- bindding inject the data to form, by "th:object=${var}", access your fields for *{field or method) -->
+            <input type="hidden" th:value="*{id}" name="id" id="id"/>
+
+            <div class="mb-3 row">
+                <!-- id of input equal to for label -->
+                <label for="number" class="col-md-2 col-form-label" th:text="Number"></label>
+                <div class="col-md-5">
+                    <input type="text" class="form-control"
+                           th:classappend="${#fields.hasErrors('number')}? 'is-invalid':'' "
+                           id="number" name="number" th:field="*{number}">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('number')}" th:errorclass="error" th:errors="*{number}"></div>
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <!-- id of input equal to for label -->
+                <label for="departure" class="col-md-2 col-form-label" th:text="Departure" ></label>
+                <div class="col-md-5">
+                    <select class="form-select" id="departure" name="departure"
+                            th:classappend="${#fields.hasErrors('airportDepartureAcronym')}? 'is-invalid':'' "
+                            th:field="*{airportDepartureAcronym}">
+                        <option value="">select an option ... </option>
+                        <!-- selecicona solo el caso que flight contanga un departure que exista en la lista-->
+                        <option th:selected="${flight.airportDepartureAcronym!=null && flight.airportDepartureAcronym == airport.acronym}"
+                                th:each="airport : ${airports}" th:value="${airport.getAcronym()}"
+                                th:text="${airport.getAcronym()}+' ( '+${airport.acronym}+' )'"></option>
+                    </select>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('airportDepartureAcronym')}" th:errors="*{airportDepartureAcronym}"></div>
+                </div>
+
+
+            </div>
+
+            <div class="mb-3 row">
+                <!-- id of input equal to for label -->
+                <label for="arrival" class="col-md-2 col-form-label" th:text="Arrival" ></label>
+                <div class="col-md-5">
+                    <select class="form-select" id="arrival" name="arrival"
+                            th:classappend="${#fields.hasErrors('airportArrivalAcronym')}? 'is-invalid':'' "
+                            th:field="*{airportArrivalAcronym}">
+                        <option value="">select an option ... </option>
+                        <!-- crea una opcion y compreuba si la opción esta ya seleccionada,
+                            selecicona solo el caso que flight contega un arrival que exista en la lista
+                         -->
+                        <option th:selected="${flight.airportArrivalAcronym!=null && flight.airportArrivalAcronym == airport.acronym}"
+                                th:each="airport : ${airports}" th:value="${airport.getAcronym()}"
+                                th:text="${airport.getAcronym()}+' ( '+${airport.acronym}+' )'"></option>
+                    </select>
+
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('airportArrivalAcronym')}" th:errorclass="error" th:errors="*{airportArrivalAcronym}"></div>
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <!-- id of input equal to for label -->
+                <label for="dayTime" class="col-md-2 col-form-label" th:text="'Day Time'"></label>
+                <div class="col-md-5">
+                    <!-- <input type="text" class="date form-control" style="width: 200px" id="dayTime" th:value="*{#temporals.format(dayTime,'dd-MM-yyy HH:mm')}" th:field="*{dayTime}"> -->
+                    <input type="text" class="date form-control" style="width: 200px" id="dayTime"
+                           th:classappend="${#fields.hasErrors('dayTime')}? 'is-invalid':'' "
+                           th:field="*{dayTime}">
+                    <!--<input type="datetime-local" class="form-control"  id="dayTime" name="dayTime"
+                           th:field="*{dayTime}">-->
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('dayTime')}" th:errorclass="error" th:errors="*{dayTime}"></div>
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <!-- id of input equal to for label -->
+                <label class="col-md-2 col-form-label" th:text="Status"></label>
+                <div class="col-md-5">
+                    <div class="form-check"
+                         th:each="status : ${T(org.tokio.spring.flight.dto.STATUS_FLIGHT_DTO).values()}"
+                         th:value="${status}">
+                        <input class="form-check-input"
+                               type="radio" name="status"
+                               th:id="${status.name()}"
+                               th:classappend="${#fields.hasErrors('status')}? 'is-invalid':'' "
+                               th:checked="${flight.status!=null && flight.status == status.name()}"
+                               th:value="${status}"
+                               th:field="*{status}"/>
+
+                        <label class="form-check-label"
+                               th:for="${status.name()}" th:text="${#strings.capitalize(status.name())}"></label>
+
+                        <div  class="invalid-feedback" th:if="${#fields.hasErrors('status')}" th:errorclass="error" th:errors="*{status}"></div>
+                    </div>
+
+
+                </div>
+            </div>
+
+
+            <div class="mb-3 row">
+                <!-- id of input equal to for label -->
+                <label for="capacity" class="col-md-2 col-form-label" th:text="Capacity"></label>
+                <div class="col-md-5">
+                    <input type="number" class="form-control"  id="capacity"
+                           name="capacity"
+                           th:classappend="${#fields.hasErrors('capacity')}? 'is-invalid':'' "
+                           th:value="*{capacity}">
+                    <div  class="invalid-feedback" th:if="${#fields.hasErrors('capacity')}" th:errorclass="error" th:errors="*{capacity}"></div>
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <!-- id of input equal to for label -->
+                <label for="image" class="col-md-2 col-form-label" th:text="Image"></label>
+                <div class="col-md-5">
+                    <input type="file" class="form-control"  id="image" name="image">
+                </div>
+            </div>
+
+            <div class="offset-md-2">
+                <button class="btn btn-primary" type="submit">Send</button>
+            </div>
+        </form>
+        <div class="col-md-4">
+            <img th:if="${resourceImageId == null}" th:src="@{/images/flight-default.jpg}" class="card-img-top img-fluid" alt="image">
+            <img th:if="${resourceImageId != null}" th:src="@{/flight/resources(rsc=${resourceImageId})}" class="card-img-top img-fluid" alt="image">
+            <br>
+            <a th:if="${resourceImageId != null}" th:href="@{/flight/resources/downloads(rsc=${resourceImageId})}">Download</a>
+            <a th:if="${resourceImageId != null}" th:href="@{/flight/removeImg(idFlight=${flight.id},rsc=${resourceImageId})}">Delete</a>
+        </div>
+    </div>
+</div>
+<footer class="container">
+    Footer Sticky
+</footer>
+<script th:replace="~{flight/fragments/common/scripts}"/>
+</body>
+</html>

@@ -15,6 +15,7 @@
         <module>email-api</module>
 		<module>flight-api</module>
         <module>security-api</module>
+        <module>flight-mvc</module>
     </modules>
 
 	<!-- por defecto es "jar"-->
